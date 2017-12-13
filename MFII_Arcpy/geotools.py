@@ -1,7 +1,6 @@
 import os
 import sys
 import traceback
-
 import arcpy
 
 
@@ -34,7 +33,7 @@ class Tools:
             print(msgs)
 
     def import_shapefiles_to_gdb(self, wildcard=None):
-        from MFII_tools.MFII_Arcpy import get_path
+        from MFII_tools.Master.MFII_Arcpy import get_path
         shplist = get_path.pathFinder.get_shapefile_path_wildcard(self.inputPath, wildcard)
 
         print("\nI found {} files to import!!!".format(len(shplist)))
@@ -60,7 +59,7 @@ class Tools:
             print(msgs)
 
     def merge_feature_class(self, name):
-        from MFII_tools.MFII_Arcpy import get_path
+        from MFII_tools.Master.MFII_Arcpy import get_path
         input_obj = get_path.pathFinder(env_0=self.inputGDB)
         fcList = input_obj.get_path_for_all_feature_from_gdb()
 

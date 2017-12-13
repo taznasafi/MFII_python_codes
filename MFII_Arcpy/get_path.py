@@ -1,9 +1,8 @@
 import fnmatch
 import os
-
 import arcpy
 
-from MFII_tools.MFII_Arcpy import path_links
+from MFII_tools.Master.MFII_Arcpy import path_links
 
 
 class pathFinder:
