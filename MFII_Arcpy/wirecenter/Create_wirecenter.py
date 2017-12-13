@@ -1,6 +1,6 @@
 import os
 
-from MFII_tools.Master import geotools, get_path, path_links
+from MFII_tools.Master.MFII_Arcpy import geotools, get_path, path_links
 
 # 1------import_wirecenters to gdb
 
