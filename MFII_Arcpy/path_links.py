@@ -17,3 +17,4 @@ dba_provider_dec2016_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\wtb_dba_pro
 LTE5_gdb_path = r"E:\MFII_Dec2016\GIS\Dec2016_LTE_Coverage\f477_bd_LTE5_by_state_diss.gdb"
 
 wireCenter_fc_path = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages\Wirecenter_working.gdb\_merged_wirecenters_pviot"
+

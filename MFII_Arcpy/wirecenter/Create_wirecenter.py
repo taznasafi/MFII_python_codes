@@ -34,3 +34,4 @@ import_wirecenters.addJoin_and_copy_feature(left_table_path[0], right_table, cre
     path_links.basepath, import_wirecenters.outputName + ".gdb", "_merged_wirecenters_pviot"),
                                             joinType="KEEP_COMMON")
 
+
