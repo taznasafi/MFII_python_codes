@@ -47,6 +47,13 @@ droprows_geotool.outputGDB = os.path.join(droprows_geotool.outputPathFolder, dro
 # export clean wire centers
 droprows_geotool.CopyFeatureclassToFeatureclass_with_expression()
 
+# delete feature classes that are empty
+
+deleteFC = geotools.Tools.deleteEmptyfeaturesFiles(droprows_geotool.outputGDB,"gdb")
+
+
+
+
 
 
 

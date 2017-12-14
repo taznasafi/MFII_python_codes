@@ -173,11 +173,69 @@ class Tools:
                 if arcpy.Exists(os.path.join(self.outputGDB, outname)):
                     print("\nVARIFIED:\n{} exists, skipping!!!!!!!!!!!".format(outname))
                 else:
-                    print("\n----------------------------------- Copying -----------------------------------")
-                    arcpy.FeatureClassToFeatureClass_conversion(fcList[0], self.outputGDB, outname,
-                                                                where_clause)
-                    print(arcpy.GetMessages())
-                    print("\n-------------------------------------------------------------------------------")
+                    try:
+
+                        print("\n----------------------------------- Copying -----------------------------------")
+                        arcpy.FeatureClassToFeatureClass_conversion(fcList[0], self.outputGDB, outname,
+                                                                    where_clause)
+                        print(arcpy.GetMessages())
+                        print("\n-------------------------------------------------------------------------------")
+
+
+                    except arcpy.ExecuteError:
+                        msgs = arcpy.GetMessages(2)
+                        arcpy.AddError(msgs)
+                        print(msgs)
+                    except:
+                        tb = sys.exc_info()[2]
+                        tbinfo = traceback.format_tb(tb)[0]
+                        pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                            sys.exc_info()[1])
+                        msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                        arcpy.AddError(pymsg)
+                        arcpy.AddError(msgs)
+                        print(pymsg)
+                        print(msgs)
+
+    @classmethod
+    def deleteEmptyfeaturesFiles(cls, path, type):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+        try:
+            if type == "Shapefile":
+                shapefile_path = get_path.pathFinder()
+                shapefileList = shapefile_path.get_shapefile_path_walk(path)
+
+                for x in shapefileList:
+                    if arcpy.GetCount_management(x)[0]=="0":
+                        arcpy.Delete_management(x)
+                        (arcpy.GetMessages(0))
+            if type == "gdb":
+                gdb= get_path.pathFinder(env_0=path)
+                fcList = gdb.get_path_for_all_feature_from_gdb()
+
+                for x in fcList:
+                    if arcpy.GetCount_management(x)[0] == "0":
+                        arcpy.Delete_management(x)
+                        print(arcpy.GetMessages(0))
+
+
+        except arcpy.ExecuteError:
+            msgs = arcpy.GetMessages(2)
+            arcpy.AddError(msgs)
+            print(msgs)
+        except:
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
+
+
+
 
 
 
