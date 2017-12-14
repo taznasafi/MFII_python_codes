@@ -1,17 +1,17 @@
 import os
 import sys
 import traceback
+
 import arcpy
 
 
 class Tools:
-    def __int__(self, inputPath=None, inputGDB = None, outputGDBName=None, outputPathFolder=None, outputGDB = None):
+    def __int__(self, inputPath=None, inputGDB=None, outputGDBName=None, outputPathFolder=None, outputGDB=None):
         self.inputPath = inputPath
         self.inputGDB = inputGDB
         self.outputGDBName = outputGDBName
         self.outputPathFolder = outputPathFolder
         self.outputGDB = outputGDB
-
 
     def create_gdb(self):
         try:
@@ -37,7 +37,6 @@ class Tools:
         shplist = get_path.pathFinder.get_shapefile_path_wildcard(self.inputPath, wildcard)
 
         print("\nI found {} files to import!!!".format(len(shplist)))
-
 
         try:
             for x in shplist:
@@ -80,15 +79,13 @@ class Tools:
             print(pymsg)
             print(msgs)
 
-
     @classmethod
     def addJoin_and_copy_feature(cls, left_table, righttable, create_id_field, joinField, outpath, joinType=None):
         arcpy.env.qualifiedFieldNames = False
         try:
             templayer = arcpy.MakeFeatureLayer_management(left_table, "temp")
 
-            if create_id_field==0:
-
+            if create_id_field == 0:
                 print("adding join")
                 arcpy.AddJoin_management("temp", joinField, righttable, joinField, joinType)
                 print(arcpy.GetMessages(0))
@@ -97,9 +94,9 @@ class Tools:
                 print(arcpy.GetMessages(0))
                 arcpy.Delete_management("temp")
 
-            if create_id_field ==1:
+            if create_id_field == 1:
                 arcpy.AddField_management("temp", "id", "TEXT")
-                id_input= "{}+{}".format("!WC_CLLI!", 'str(!TT_ID!)')
+                id_input = "{}+{}".format("!WC_CLLI!", 'str(!TT_ID!)')
                 arcpy.CalculateField_management("temp", "id", expression=id_input, expression_type="python 10.5")
 
                 print("adding join")
@@ -147,7 +144,6 @@ class Tools:
             print(pymsg)
             print(msgs)
 
-
     def CopyFeatureclassToFeatureclass_with_expression(self):
         from MFII_tools.Master.MFII_Arcpy import get_path
 
@@ -160,14 +156,13 @@ class Tools:
             fcList = fcTOfc.get_file_path_with_wildcard_from_gdb(wildcard)
             print(fcList)
 
-
             if len(fcList) == 0:
                 print("there is no feature class by that query")
             else:
-                where_clause =  " STATE_FIPS =  %s " % int(state)
+                where_clause = " STATE_FIPS =  %s " % int(state)
                 print(where_clause)
                 split_name = os.path.split(fcList[0])
-                outname = "_cleaned_" +split_name[1]
+                outname = "_cleaned_" + split_name[1]
                 print(outname)
 
                 if arcpy.Exists(os.path.join(self.outputGDB, outname)):
@@ -206,11 +201,11 @@ class Tools:
                 shapefileList = shapefile_path.get_shapefile_path_walk(path)
 
                 for x in shapefileList:
-                    if arcpy.GetCount_management(x)[0]=="0":
+                    if arcpy.GetCount_management(x)[0] == "0":
                         arcpy.Delete_management(x)
                         (arcpy.GetMessages(0))
             if type == "gdb":
-                gdb= get_path.pathFinder(env_0=path)
+                gdb = get_path.pathFinder(env_0=path)
                 fcList = gdb.get_path_for_all_feature_from_gdb()
 
                 for x in fcList:
@@ -233,14 +228,3 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
-
-
-
-
-
-
-
-
-
-
-
