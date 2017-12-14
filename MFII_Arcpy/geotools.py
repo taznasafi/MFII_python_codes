@@ -5,17 +5,17 @@ import arcpy
 
 
 class Tools:
-    def __int__(self, inputPath=None, inputGDB = None, outputName=None, outputPathFolder=None, outputGDB = None):
+    def __int__(self, inputPath=None, inputGDB = None, outputGDBName=None, outputPathFolder=None, outputGDB = None):
         self.inputPath = inputPath
         self.inputGDB = inputGDB
-        self.outputName = outputName
+        self.outputGDBName = outputGDBName
         self.outputPathFolder = outputPathFolder
         self.outputGDB = outputGDB
 
 
     def create_gdb(self):
         try:
-            arcpy.CreateFileGDB_management(out_folder_path=self.outputPathFolder, out_name=self.outputName)
+            arcpy.CreateFileGDB_management(out_folder_path=self.outputPathFolder, out_name=self.outputGDBName)
             print(arcpy.GetMessages(0))
 
         except arcpy.ExecuteError:
@@ -146,6 +146,43 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+
+
+    def CopyFeatureclassToFeatureclass_with_expression(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+
+        fcTOfc = get_path.pathFinder(env_0=self.inputGDB)
+
+        stateList = fcTOfc.make_fips_list()
+
+        for state in stateList:
+            wildcard = "*_" + state
+            fcList = fcTOfc.get_file_path_with_wildcard_from_gdb(wildcard)
+            print(fcList)
+
+
+            if len(fcList) == 0:
+                print("there is no feature class by that query")
+            else:
+                where_clause =  " STATE_FIPS =  %s " % int(state)
+                print(where_clause)
+                split_name = os.path.split(fcList[0])
+                outname = "_cleaned_" +split_name[1]
+                print(outname)
+
+                if arcpy.Exists(os.path.join(self.outputGDB, outname)):
+                    print("\nVARIFIED:\n{} exists, skipping!!!!!!!!!!!".format(outname))
+                else:
+                    print("\n----------------------------------- Copying -----------------------------------")
+                    arcpy.FeatureClassToFeatureClass_conversion(fcList[0], self.outputGDB, outname,
+                                                                where_clause)
+                    print(arcpy.GetMessages())
+                    print("\n-------------------------------------------------------------------------------")
+
+
+
+
+
 
 
 

@@ -8,9 +8,11 @@ from MFII_tools.Master.MFII_Arcpy import path_links
 class pathFinder:
 
 
-    def __init__(self, env_0=None, env_1=None):
+    def __init__(self, env_0=None, env_1=None, outPathFolder=None, outPathGDB = None):
         self.env_0 = env_0
         self.env_1 = env_1
+        self.outPathFolder = outPathFolder
+        self.outPathGDB = outPathGDB
 
 
 

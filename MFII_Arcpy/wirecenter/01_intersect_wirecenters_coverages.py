@@ -5,12 +5,14 @@ from MFII_tools.Master.MFII_Arcpy import geotools, get_path, path_links
 wirecenterIntersect = geotools.Tools()
 
 wirecenterIntersect.outputPathFolder = path_links.basepath
-wirecenterIntersect.outputName = "_01_intersect_subsidy_with_Grid"
+wirecenterIntersect.outputGDBName = "_01_intersect_subsidy_with_Grid"
 wirecenterIntersect.create_gdb()
 
-wirecenterIntersect.outputGDB = os.path.join(wirecenterIntersect.outputPathFolder, wirecenterIntersect.outputName + ".gdb")
+wirecenterIntersect.outputGDB = os.path.join(wirecenterIntersect.outputPathFolder, wirecenterIntersect.outputGDBName + ".gdb")
 wirecenterSplitPath = get_path.pathFinder()
 LTE5Coverages_path = get_path.pathFinder()
+
+
 states = wirecenterSplitPath.make_fips_list()
 
 
@@ -34,15 +36,16 @@ for fips in states:
 
 
 
-droprows = get_path.pathFinder()
-droprows.env_0 = os.path.join(wirecenterIntersect.outputGDB)
+droprows_geotool = geotools.Tools()
 
+droprows_geotool.outputPathFolder = path_links.basepath
+droprows_geotool.outputGDBName = "_01A_cleaned_intersect_subsidy_with_Grid_"
+droprows_geotool.create_gdb()
+droprows_geotool.inputGDB = wirecenterIntersect.outputGDB
+droprows_geotool.outputGDB = os.path.join(droprows_geotool.outputPathFolder, droprows_geotool.outputGDBName + ".gdb")
 
-
-
-
-
-
+# export clean wire centers
+droprows_geotool.CopyFeatureclassToFeatureclass_with_expression()
 
 
 
