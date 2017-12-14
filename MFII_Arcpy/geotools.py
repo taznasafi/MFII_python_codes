@@ -228,3 +228,96 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+
+
+    def export_subsidized_Coverage(self):
+        try:
+
+            from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
+
+            sub_Coverage = get_path.pathFinder()
+            sub_Coverage.env_0 = self.inputGDB
+
+            StatesList = sub_Coverage.make_fips_list()
+
+            for fips in StatesList:
+
+                pidList = sub_Coverage.query_provider_by_FIPS(path_links.LTE5_table_path,str(int(fips)))
+                print("\n{} : {}".format(fips, pidList))
+
+                fc_response = "*_" + fips
+                fcList = sub_Coverage.get_file_path_with_wildcard_from_gdb(fc_response)
+                print("\t", fcList)
+
+
+                if len(fcList) == 0:
+                    print("skipping state: {}!!!".format(fips))
+
+                else:
+
+                    # make a layer from the feature class
+                    arcpy.MakeFeatureLayer_management(fcList[0], "temp_layer")
+
+                    # list fields
+                    field_names = [f.name for f in arcpy.ListFields("temp_layer")]
+                    field_type = [f.type for f in arcpy.ListFields("temp_layer")]
+                    field_dic = dict(zip(field_names, field_type))
+                    #print(field_names)
+                    print()
+                    #print(field_type)
+
+                    for y in pidList:
+                        field = "provider_id{}".format(y)
+                        print(field)
+
+
+
+                        if field_dic[field] == "String":
+
+                            # where_clause = """ "p%s" = %d AND "pid" = %s""" % (y, y, y)
+                            where_clause = " provider_id%s = '%d' AND pid = %s" % (y, y, y)
+                            arcpy.SelectLayerByAttribute_management("temp_layer", "ADD_TO_SELECTION",where_clause)
+                            print(arcpy.GetMessages())
+
+
+                        else:
+                            where_clause = """ provider_id%s = %s AND pid = %s""" % (y, y, y)
+                            print(where_clause)
+
+                            arcpy.SelectLayerByAttribute_management("temp_layer", "ADD_TO_SELECTION",
+                                                                        where_clause)
+                            print(arcpy.GetMessages())
+
+
+                    name = os.path.split(fcList[0])
+                    out_feature_class = os.path.join(self.outputGDB, "_subsidized_" + name[1])
+
+                    if arcpy.Exists(out_feature_class):
+                        print("the file exists, skipping!!!!!!")
+                        arcpy.Delete_management("temp_layer")
+                    else:
+
+                        # export the feature layer
+                        arcpy.CopyFeatures_management("temp_layer", out_feature_class)
+                        print(arcpy.GetMessages())
+                        # Delete Temp feature layer
+                        arcpy.Delete_management("temp_layer")
+
+
+        except arcpy.ExecuteError:
+            msgs = arcpy.GetMessages(2)
+            arcpy.AddError(msgs)
+            print(msgs)
+
+        except:
+
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
