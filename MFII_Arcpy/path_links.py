@@ -1,9 +1,13 @@
-
+import os
 
 #basepath
-basepath = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages"
+outputbasepath = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages"
 
 subsidy_table_path =r"E:\MFII_Dec2016\CSV Files\New_csv\CSV_TABLES.gdb\cetc_subsidy_pid_pivot"
+
+state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
+Coverage_path = r"D:\Coverage_data\F-477\2016Dec\GDB\F477_bd_projected.gdb"
+LTE5_coverage = os.path.join(outputbasepath, "LTE5_Coverages.gdb")
 
 
 #state Fips csv
@@ -14,7 +18,7 @@ LTE5_table_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\LTE5_number_of_provid
 
 dba_provider_dec2016_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\wtb_dba_provider_dec2016.csv"
 
-LTE5_gdb_path = r"E:\MFII_Dec2016\GIS\Dec2016_LTE_Coverage\f477_bd_LTE5_by_state_diss.gdb"
+LTE5_gdb_path = os.path.join(outputbasepath,LTE5_coverage)
 
 wireCenter_fc_path = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages\Wirecenter_working.gdb\_merged_wirecenters_pviot"
 
