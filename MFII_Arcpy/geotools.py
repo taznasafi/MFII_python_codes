@@ -382,3 +382,151 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+
+
+    def clipshapefiles(self, clippath, infeaturepath, type):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+
+        try:
+            fipsList = get_path.pathFinder.make_fips_list()
+            if type == "gdb":
+                clipFC = get_path.pathFinder()
+                clipFC.env_0 = clippath
+
+                inFeatureFC = get_path.pathFinder()
+                inFeatureFC.env_0 = infeaturepath
+
+
+                for state in fipsList:
+
+                    clipwildcard = "*_"+state+"_"
+
+                    clipFCList = clipFC.get_file_path_with_wildcard_from_gdb(clipwildcard)
+
+                    inFeatureFCList = inFeatureFC.get_path_for_all_feature_from_gdb()
+                    inFeatureFCName = os.path.split(inFeatureFCList[0])
+                    outfeature = os.path.join(self.outputGDB, inFeatureFCName[1]+"_"+state)
+
+                    if arcpy.Exists(outfeature):
+                        print("Verified {} exists".format(outfeature))
+                    else:
+                        arcpy.Clip_analysis(inFeatureFCList[0], clipFCList[0], outfeature)
+                        print("\n", arcpy.GetMessages(0))
+
+
+        except arcpy.ExecuteError:
+            msgs = arcpy.GetMessages(2)
+            arcpy.AddError(msgs)
+            print(msgs)
+
+        except:
+
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
+
+
+
+    def importLTE5Coverages(self, wilcard, outputpath):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+
+        try:
+
+            lte5 = get_path.pathFinder()
+            lte5.env_0 = self.inputGDB
+            lte5List = lte5.get_file_path_with_wildcard_from_gdb(wilcard)
+            print(lte5List)
+
+
+            print(outputpath)
+
+            for x in lte5List:
+                name = os.path.split(x)
+                outputName = name[1]
+                print(outputName)
+
+                if arcpy.Exists(os.path.join(outputpath, outputName + "__LTE5")):
+                    print("\n=========================================================")
+                    print("Verified {} exists".format(outputName))
+                    print("\n=========================================================")
+
+                else:
+                    # create a new temp layer
+                    print("\n=========================================================")
+                    arcpy.MakeFeatureLayer_management(x, outputName + "_tempLayer")
+                    print("\nmade a temp layer for {}".format(outputName))
+
+                    print("\n\n\n\nCurrently I am working on this feature class file: " + str(outputName))
+
+                    print('\n"Selecting This criteria: "MINDOWN >=' + "5")
+                    arcpy.SelectLayerByAttribute_management(outputName + '_tempLayer', "New_SELECTION",
+                                                            'MINDOWN >=' + "5")
+
+                    print("\ncreating a new feature class to output:\n {}\n please wait!!!".format(
+                        os.path.join(outputpath, outputName + "__LTE5")))
+                    arcpy.CopyFeatures_management(outputName + '_tempLayer',
+                                                  os.path.join(outputpath, outputName + "__LTE5"))
+                    print(arcpy.GetMessages())
+                    print("\n=========================================================")
+
+        except arcpy.ExecuteError:
+            msgs = arcpy.GetMessages(2)
+            arcpy.AddError(msgs)
+            print(msgs)
+
+        except:
+
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
+
+
+
+
+
+    def importShapefilesToGDB(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+
+        try:
+            importShp = get_path.pathFinder()
+
+            ShpList = importShp.get_shapefile_path_walk(self.outputPathFolder)
+
+            for shapefile in ShpList:
+                print("\mImporting Shapefiles")
+                arcpy.FeatureClassToGeodatabase_conversion(shapefile, self.outputGDB)
+                print(arcpy.GetMessages(0))
+
+
+        except arcpy.ExecuteError:
+            msgs = arcpy.GetMessages(2)
+            arcpy.AddError(msgs)
+            print(msgs)
+
+        except:
+
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
+
+
+
+
