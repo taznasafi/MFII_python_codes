@@ -64,11 +64,17 @@ subCoverage.outputGDB = os.path.join(subCoverage.outputPathFolder, subCoverage.o
 
 subCoverage.export_subsidized_Coverage()
 
+deleteFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.outputGDB,"gdb")
 
+# split the coverages by state and provider
 
-
-
-
+splitSubsidized_Coverages = geotools.Tools()
+splitSubsidized_Coverages.inputGDB = subCoverage.outputGDB
+splitSubsidized_Coverages.outputPathFolder = path_links.basepath
+splitSubsidized_Coverages.outputGDBName = "_03_split_subsidized_coverage"
+splitSubsidized_Coverages.create_gdb()
+splitSubsidized_Coverages.outputGDB = os.path.join(splitSubsidized_Coverages.outputPathFolder, splitSubsidized_Coverages.outputGDBName+".gdb")
+splitSubsidized_Coverages.splitCoverages(split_fields=["STATE_FIPS", "pid"])
 
 
 
