@@ -4,7 +4,7 @@ from MFII_tools.Master.MFII_Arcpy import geotools, get_path, path_links
 
 wirecenterIntersect = geotools.Tools()
 
-wirecenterIntersect.outputPathFolder = path_links.basepath
+wirecenterIntersect.outputPathFolder = path_links.outputbasepath
 wirecenterIntersect.outputGDBName = "_01_intersect_subsidy_with_Grid"
 wirecenterIntersect.create_gdb()
 
@@ -38,7 +38,7 @@ for fips in states:
 
 droprows_geotool = geotools.Tools()
 
-droprows_geotool.outputPathFolder = path_links.basepath
+droprows_geotool.outputPathFolder = path_links.outputbasepath
 droprows_geotool.outputGDBName = "_01A_cleaned_intersect_subsidy_with_Grid_"
 droprows_geotool.create_gdb()
 droprows_geotool.inputGDB = wirecenterIntersect.outputGDB
@@ -58,19 +58,19 @@ subCoverage = geotools.Tools()
 subCoverage.inputGDB = droprows_geotool.outputGDB
 
 subCoverage.outputGDBName = "_02_subsidized_coverage"
-subCoverage.outputPathFolder = path_links.basepath
+subCoverage.outputPathFolder = path_links.outputbasepath
 subCoverage.create_gdb()
 subCoverage.outputGDB = os.path.join(subCoverage.outputPathFolder, subCoverage.outputGDBName+".gdb")
 
 subCoverage.export_subsidized_Coverage()
 
-deleteFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.outputGDB,"gdb")
+deleteSubCoverageFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.outputGDB,"gdb")
 
 # split the coverages by state and provider
 
 splitSubsidized_Coverages = geotools.Tools()
 splitSubsidized_Coverages.inputGDB = subCoverage.outputGDB
-splitSubsidized_Coverages.outputPathFolder = path_links.basepath
+splitSubsidized_Coverages.outputPathFolder = path_links.outputbasepath
 splitSubsidized_Coverages.outputGDBName = "_03_split_subsidized_coverage"
 splitSubsidized_Coverages.create_gdb()
 splitSubsidized_Coverages.outputGDB = os.path.join(splitSubsidized_Coverages.outputPathFolder, splitSubsidized_Coverages.outputGDBName+".gdb")
