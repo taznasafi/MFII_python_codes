@@ -229,6 +229,14 @@ class Tools:
             print(pymsg)
             print(msgs)
 
+    @classmethod
+    def findField(cls,fc,fi):
+        fieldnames = [field.name for field in arcpy.ListFields(fc)]
+        if fi in fieldnames:
+            return fi
+        else:
+            print("field not found")
+
 
     def export_subsidized_Coverage(self):
         try:
@@ -271,24 +279,42 @@ class Tools:
                         field = "provider_id{}".format(y)
                         print(field)
 
+                        def findField(fc, fi):
+                            fieldnames = [field.name for field in arcpy.ListFields(fc)]
+                            if fi in fieldnames:
+                                return fi
+                            else:
+                                return "pass"
 
+                        field_found = findField('temp_layer', field)
 
-                        if field_dic[field] == "String":
-
-                            # where_clause = """ "p%s" = %d AND "pid" = %s""" % (y, y, y)
-                            where_clause = " provider_id%s = '%d' AND pid = %s" % (y, y, y)
-                            arcpy.SelectLayerByAttribute_management("temp_layer", "ADD_TO_SELECTION",where_clause)
-                            print(arcpy.GetMessages())
-
-
+                        if field_found == "pass":
+                            print("could not find the field passing it!!")
                         else:
-                            where_clause = """ provider_id%s = %s AND pid = %s""" % (y, y, y)
-                            print(where_clause)
 
-                            arcpy.SelectLayerByAttribute_management("temp_layer", "ADD_TO_SELECTION",
-                                                                        where_clause)
-                            print(arcpy.GetMessages())
+                            try:
 
+                                if field_dic[field_found] == "String":
+
+                                    # where_clause = """ "p%s" = %d AND "pid" = %s""" % (y, y, y)
+                                    where_clause = " provider_id%s = '%d' AND pid = %s" % (y, y, y)
+                                    arcpy.SelectLayerByAttribute_management("temp_layer", "ADD_TO_SELECTION",where_clause)
+                                    print(arcpy.GetMessages())
+
+
+                                else:
+                                    where_clause = """ provider_id%s = %s AND pid = %s""" % (y, y, y)
+                                    print(where_clause)
+
+                                    arcpy.SelectLayerByAttribute_management("temp_layer", "ADD_TO_SELECTION",
+                                                                                where_clause)
+                                    print(arcpy.GetMessages())
+
+                            except arcpy.ExecuteError:
+                                msgs = arcpy.GetMessages(2)
+                                arcpy.AddError(msgs)
+                                print(msgs)
+                                pass
 
                     name = os.path.split(fcList[0])
                     out_feature_class = os.path.join(self.outputGDB, "_subsidized_" + name[1])
@@ -304,6 +330,41 @@ class Tools:
                         # Delete Temp feature layer
                         arcpy.Delete_management("temp_layer")
 
+
+        except arcpy.ExecuteError:
+            msgs = arcpy.GetMessages(2)
+            arcpy.AddError(msgs)
+            print(msgs)
+
+        except:
+
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
+
+
+    def splitCoverages(self, split_fields):
+        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
+        try:
+
+            split = get_path.pathFinder()
+            split.env_0 = self.inputGDB
+
+            fcList = split.get_path_for_all_feature_from_gdb()
+
+            for x in fcList:
+                name = os.path.split(x)
+                print("\n\n\nlooking at '{}' feature class, please wait!!!".format(name[1]))
+                print("Splitting the files, might take a while. Go for a walk :) \n\n")
+                arcpy.SplitByAttributes_analysis(x, self.outputGDB, split_fields)
+                print(arcpy.GetMessages(0))
 
         except arcpy.ExecuteError:
             msgs = arcpy.GetMessages(2)
