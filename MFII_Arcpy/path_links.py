@@ -5,7 +5,8 @@ outputbasepath = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages"
 
 subsidy_table_path =r"E:\MFII_Dec2016\CSV Files\New_csv\CSV_TABLES.gdb\cetc_subsidy_pid_pivot"
 
-state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
+raw_state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
+state_boundary_gdb = os.path.join(outputbasepath,"state_boundary_2010_wgs84.gdb")
 Coverage_path = r"D:\Coverage_data\F-477\2016Dec\GDB\F477_bd_projected.gdb"
 LTE5_coverage = os.path.join(outputbasepath, "LTE5_Coverages.gdb")
 

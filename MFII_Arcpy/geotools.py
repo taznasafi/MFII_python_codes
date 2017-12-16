@@ -210,6 +210,7 @@ class Tools:
 
                 for x in fcList:
                     if arcpy.GetCount_management(x)[0] == "0":
+                        print("deleting file: {}".format(x))
                         arcpy.Delete_management(x)
                         print(arcpy.GetMessages(0))
 
@@ -399,19 +400,27 @@ class Tools:
 
                 for state in fipsList:
 
-                    clipwildcard = "*_"+state+"_"
+                    clipwildcard = "*_"+state+"_*"
+                    print(clipwildcard)
 
                     clipFCList = clipFC.get_file_path_with_wildcard_from_gdb(clipwildcard)
 
-                    inFeatureFCList = inFeatureFC.get_path_for_all_feature_from_gdb()
-                    inFeatureFCName = os.path.split(inFeatureFCList[0])
-                    outfeature = os.path.join(self.outputGDB, inFeatureFCName[1]+"_"+state)
 
-                    if arcpy.Exists(outfeature):
-                        print("Verified {} exists".format(outfeature))
-                    else:
-                        arcpy.Clip_analysis(inFeatureFCList[0], clipFCList[0], outfeature)
-                        print("\n", arcpy.GetMessages(0))
+                    inFeatureFCList = inFeatureFC.get_path_for_all_feature_from_gdb()
+
+                    for x in inFeatureFCList:
+                        inFeatureFCName = os.path.split(x)
+                        outfeature = os.path.join(self.outputGDB, inFeatureFCName[1]+"_"+state)
+
+                        if len(x) ==0 or len(clipFCList) == 0:
+                            print("print one of the feature class list are empty skipping")
+                        else:
+                            print("clip Feature List: {}\nin Feature List:{}".format(clipFCList[0], x))
+                            if arcpy.Exists(outfeature):
+                                print("Verified {} exists".format(outfeature))
+                            else:
+                                arcpy.Clip_analysis(x, clipFCList[0], outfeature)
+                                print("\n", arcpy.GetMessages(0))
 
 
         except arcpy.ExecuteError:
@@ -502,12 +511,19 @@ class Tools:
         try:
             importShp = get_path.pathFinder()
 
-            ShpList = importShp.get_shapefile_path_walk(self.outputPathFolder)
+            ShpList = importShp.get_shapefile_path_walk(self.inputPath)
 
-            for shapefile in ShpList:
-                print("\mImporting Shapefiles")
-                arcpy.FeatureClassToGeodatabase_conversion(shapefile, self.outputGDB)
-                print(arcpy.GetMessages(0))
+            for x in ShpList:
+
+                Shppathsplit = os.path.split(x)
+                ShpName = Shppathsplit[1]
+
+                if arcpy.Exists(os.path.join(self.outputGDB, ShpName)):
+                    print("exits, skipping!!!")
+
+                else:
+                    arcpy.FeatureClassToGeodatabase_conversion(x, self.outputGDB)
+                    print(arcpy.GetMessages(0))
 
 
         except arcpy.ExecuteError:
@@ -526,6 +542,13 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+
+
+    def attach_pid_toCoverages(self):
+        pass
+
+
+
 
 
 
