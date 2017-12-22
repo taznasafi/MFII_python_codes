@@ -7,7 +7,6 @@ wirecenterIntersect = geotools.Tools()
 wirecenterIntersect.outputPathFolder = path_links.outputbasepath
 wirecenterIntersect.outputGDBName = "_01_intersect_subsidy_with_Grid"
 wirecenterIntersect.create_gdb()
-
 wirecenterIntersect.outputGDB = os.path.join(wirecenterIntersect.outputPathFolder, wirecenterIntersect.outputGDBName + ".gdb")
 wirecenterSplitPath = get_path.pathFinder()
 LTE5Coverages_path = get_path.pathFinder()
@@ -18,8 +17,8 @@ states = wirecenterSplitPath.make_fips_list()
 
 for fips in states:
     state_name = wirecenterSplitPath.query_state_name_by_fips(table_path=path_links.Fips_table_path, fips=fips)
-    LTE5Coverages_path.env_0 = path_links.LTE5_gdb_path
-    LTE5Coverages = LTE5Coverages_path.get_file_path_with_wildcard_from_gdb("*_"+fips+"_*")
+    LTE5Coverages_path.env_0 = path_links.LTE5_diss_gdb_path
+    LTE5Coverages = LTE5Coverages_path.get_file_path_with_wildcard_from_gdb("*_"+fips)
     print(LTE5Coverages)
 
     if len(LTE5Coverages) ==0:
@@ -67,7 +66,6 @@ subCoverage.export_subsidized_Coverage()
 deleteSubCoverageFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.outputGDB,"gdb")
 
 # split the coverages by state and provider
-
 splitSubsidized_Coverages = geotools.Tools()
 splitSubsidized_Coverages.inputGDB = subCoverage.outputGDB
 splitSubsidized_Coverages.outputPathFolder = path_links.outputbasepath
