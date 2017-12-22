@@ -62,6 +62,18 @@ class pathFinder:
         return pid_query.provider.unique()
 
     @classmethod
+    def query_provider_pid_by_provider_dba(cls, table_path, frn):
+        import pandas as pd
+        df = pd.read_csv(table_path)
+        query_results = df.query("f477_provider_frn == {}".format(frn))
+        dic = query_results.to_dict('records')
+        return dic[0]
+
+
+
+
+
+    @classmethod
     def query_state_name_by_fips(cls, table_path, fips):
         import pandas as pd
         Fips_table_path = table_path
@@ -100,7 +112,7 @@ class pathFinder:
                 # for the files that endswith .shp, join the root and file
                 file_loc.append(os.path.join(root, file))
 
-        if len(file_loc)==0:
+        if list(file_loc) == 'NoneType':
             raise Warning("Did not find path, check your wild card")
 
         else:
