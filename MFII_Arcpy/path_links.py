@@ -9,6 +9,8 @@ raw_state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
 state_boundary_gdb = os.path.join(outputbasepath,"state_boundary_2010_wgs84.gdb")
 Coverage_path = r"D:\Coverage_data\F-477\2016Dec\GDB\F477_bd_projected.gdb"
 
+# state_grid
+raw_state_grid = r"E:\state_boundary_jon"
 
 
 #state Fips csv
@@ -65,10 +67,11 @@ LTE5Split_gdb_path = os.path.join(outputbasepath, "_04_split_LTE5_coverages.gdb"
 
 LTE5_coverage_minus_subsidy = os.path.join(outputbasepath, "_coverage_minus_subsidy_mfi.gdb")
 
-# state_grid
 
-state_grid = r"E:\state_boundary_jon"
 
 # Ineligible area
 ineligible_coverages_gdb_path = os.path.join(outputbasepath, "_intersect_ineligible_coverages.gdb")
 
+# Ineligible area minus diminimus
+
+ineligible_coverages_minus_diminimus_gdb_path = os.path.join(outputbasepath, "_provider_coverages_minus_diminimus.gdb")

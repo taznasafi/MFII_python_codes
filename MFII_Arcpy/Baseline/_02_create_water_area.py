@@ -31,3 +31,13 @@ intersect.outputGDBName = "water_area_blocks_Grid"
 intersect.create_gdb()
 intersect.outputGDB = os.path.join(intersect.outputPathFolder, intersect.outputGDBName+".gdb")
 intersect.intersect_water_by_stateGrid()
+
+
+
+# add field
+
+addfield = geotools.Tools()
+
+addfield.inputGDB = intersect.outputGDB
+addfield.add_field_for_all_fc("WATER_AREA","DOUBLE",field_length=None)
+addfield.calculate_area_in_meters("WATER_AREA")

@@ -1134,7 +1134,7 @@ class Tools:
             grid_wildcard = "*_" + state
             print("\tthe wildcard for grid is: {}".format(grid_wildcard))
 
-            gridList = get_path.pathFinder.get_shapefile_path_wildcard(path_links.state_grid,grid_wildcard)
+            gridList = get_path.pathFinder.get_shapefile_path_wildcard(path_links.raw_state_grid, grid_wildcard)
 
             for pid in providerList:
 
@@ -1179,7 +1179,7 @@ class Tools:
         try:
 
             in_features = get_path.pathFinder()
-            in_features.env_0 = path_links.ineligible_coverages_gdb_path
+            in_features.env_0 = self.inputGDB
 
             in_featuresList = in_features.get_path_for_all_feature_from_gdb()
 
@@ -1363,7 +1363,7 @@ class Tools:
                 wildcard = "*_" + state
                 print("\tthe wildcard for grid is: {}".format(wildcard))
 
-                gridList = get_path.pathFinder.get_shapefile_path_wildcard(path_links.state_grid, wildcard)
+                gridList = get_path.pathFinder.get_shapefile_path_wildcard(path_links.raw_state_grid, wildcard)
 
 
                 waterAreaList = water_area.get_file_path_with_wildcard_from_gdb(wildcard)
@@ -1426,27 +1426,36 @@ class Tools:
             for state in stateList:
 
                 erasewildcard = "*_"+state
-                infeatureWildcard = "*_"+state+"_*"
-                infeatureList = infeature.get_file_path_with_wildcard_from_gdb(infeatureWildcard)
-
                 erasefeatureList = erasefeature.get_file_path_with_wildcard_from_gdb(erasewildcard)
 
-                if len(infeatureList) ==0 or len(erasefeatureList)==0:
-                    print("one or more feature classes are mising for state: {}".format(state))
-                else:
+                pidList = get_path.pathFinder.query_provider_by_FIPS(path_links.LTE5_table_path, str(int(state)))
 
-                    print("In feature class is {}\nErase feature class is {}".format(os.path.basename(infeatureList[0]), os.path.basename(erasefeatureList[0])))
+                for provider in pidList:
 
-                    outfeature = os.path.join(self.outputGDB, os.path.basename(infeatureList[0]))
+                    print("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx state: {} xxxx prividor id: {} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n".format(state, provider))
+                    infeatureWildcard = "*_{}_{}".format(state, provider)
 
-                    if arcpy.Exists(outfeature):
-                        print("the feature class exists, Skipping!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    infeatureList = infeature.get_file_path_with_wildcard_from_gdb(infeatureWildcard)
 
+
+
+                    if len(infeatureList) ==0 or len(erasefeatureList)==0:
+                        print("one or more feature classes are mising for state: {}".format(state))
                     else:
-                        print("erasing, hold your horses")
 
-                        arcpy.Erase_analysis(infeatureList[0],erasefeatureList[0], outfeature)
-                        print(arcpy.GetMessages(0))
+                        print("\n\nIn feature class is {}\nErase feature class is {}".format(os.path.basename(infeatureList[0]), os.path.basename(erasefeatureList[0])))
+
+                        outfeature = os.path.join(self.outputGDB, os.path.basename(infeatureList[0]))
+
+                        if arcpy.Exists(outfeature):
+                            print("\nthe feature class exists, Skipping!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+                        else:
+                            print("\n\nerasing, hold your horses")
+
+                            arcpy.Erase_analysis(infeatureList[0],erasefeatureList[0], outfeature)
+                            print(arcpy.GetMessages(0))
+                            print()
 
         except:
             tb = sys.exc_info()[2]
@@ -1458,8 +1467,221 @@ class Tools:
             print(pymsg)
             print(msgs)
 
+    def add_field_for_all_fc(self, field_name, field_type, field_length):
+        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
+        fcObj = get_path.pathFinder()
+        fcObj.env_0 = self.inputGDB
+
+        fcList = fcObj.get_path_for_all_feature_from_gdb()
+
+        for fc in fcList:
+
+            try:
+                print("\nadding field")
+                arcpy.AddField_management(fc, field_name, field_type, field_length)
+                print(arcpy.GetMessages(0))
+
+            except arcpy.ExecuteError:
+                msgs = arcpy.GetMessages(2)
+                arcpy.AddError(msgs)
+                print(msgs)
+            except:
+                tb = sys.exc_info()[2]
+                tbinfo = traceback.format_tb(tb)[0]
+                pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
+                    sys.exc_info()[1])
+                msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                arcpy.AddError(pymsg)
+                arcpy.AddError(msgs)
+                print(pymsg)
+                print(msgs)
 
 
+
+    def calculate_area_in_meters(self, field_name):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+
+        fc = get_path.pathFinder()
+        fc.env_0 = self.inputGDB
+
+        fcList = fc.get_path_for_all_feature_from_gdb()
+
+        for x in fcList:
+            try:
+
+                print("\nlooking into {}".format(os.path.basename(x)))
+
+                exp = "!SHAPE.geodesicArea@SQUAREMETERS!"
+                arcpy.CalculateField_management(x, field_name, exp, "PYTHON_10.5")
+                print("calculated!!!")
+
+
+            except:
+                tb = sys.exc_info()[2]
+                tbinfo = traceback.format_tb(tb)[0]
+                pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+                msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                arcpy.AddError(pymsg)
+                arcpy.AddError(msgs)
+                print(pymsg)
+                print(msgs)
+
+
+    def drop_diminimus_area(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+
+        fcObj = get_path.pathFinder()
+        fcObj.env_0 = self.inputGDB
+
+        fcList = fcObj.get_path_for_all_feature_from_gdb()
+
+        for fc in fcList:
+
+            in_features = fc
+            print("\n\nIn Feature: {}".format(os.path.basename(fc)))
+            out_path = self.outputGDB
+            out_name = os.path.basename(fc)
+
+            where_clause = "area > {}".format(225 * 225)
+
+            try:
+                arcpy.FeatureClassToFeatureClass_conversion(in_features, out_path, out_name, where_clause)
+                print(arcpy.GetMessages(0))
+
+
+            except arcpy.ExecuteError:
+                msg = arcpy.GetMessages(2)
+                arcpy.AddError(msg)
+                print(msg)
+
+
+    def merge_ineligible_coverages(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path,path_links
+        merge = get_path.pathFinder()
+        merge.env_0 = self.inputGDB
+
+        stateList = merge.make_fips_list()
+
+        for state in stateList:
+
+            wildcard = "*_"+state+"_*"
+            print("\t\t\t\txxxxxxxxxxx state: {}; Wildcard: {} xxxxxxxxxxxxxx\n".format(state, wildcard))
+            mergeList = merge.get_file_path_with_wildcard_from_gdb(wildcard)
+            print(mergeList)
+
+            outfeature = os.path.join(self.outputGDB, "_merged_"+state)
+
+            if arcpy.Exists(outfeature):
+                print("file already Exists, Skipping !!!!!!!!!!!!!!!!!\n")
+
+            else:
+
+                try:
+                    print("Merging files")
+                    arcpy.Merge_management(mergeList,outfeature)
+                    print(arcpy.GetMessages(0))
+
+                except:
+                    tb = sys.exc_info()[2]
+                    tbinfo = traceback.format_tb(tb)[0]
+                    pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+                    msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                    arcpy.AddError(pymsg)
+                    arcpy.AddError(msgs)
+                    print(pymsg)
+                    print(msgs)
+
+
+
+    def erase_coverages_from_state_boundary(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path,path_links
+        eraseFeature = get_path.pathFinder()
+        eraseFeature.env_0 = self.inputGDB
+        stateList = eraseFeature.make_fips_list()
+
+        for state in stateList:
+            wildcard = "*_"+state
+            print("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx state: {} xxxx wildcard: {} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n".format(
+                    state, wildcard))
+            eraseFeatureList = eraseFeature.get_file_path_with_wildcard_from_gdb(wildcard)
+            inputFeatureList = get_path.pathFinder.get_shapefile_path_wildcard(path_links.raw_state_grid,wildcard)
+
+            outFeature = os.path.join(self.outputGDB,"eligible_area_"+state)
+
+            if arcpy.Exists(outFeature):
+                print("this file already exists, skipping !!!!!!!!!!!!!!!!!!")
+
+            else:
+
+                try:
+
+                    arcpy.Erase_analysis(inputFeatureList[0],eraseFeatureList[0],outFeature)
+                    print(arcpy.GetMessages(0))
+
+                except:
+                    tb = sys.exc_info()[2]
+                    tbinfo = traceback.format_tb(tb)[0]
+                    pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+                    msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                    arcpy.AddError(pymsg)
+                    arcpy.AddError(msgs)
+                    print(pymsg)
+                    print(msgs)
+
+
+    def erase_water_blocks_from_eligible_area(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
+        try:
+
+            stateList = get_path.pathFinder.make_fips_list()
+
+            infeature = get_path.pathFinder()
+            infeature.env_0 = self.inputGDB
+
+            erasefeature = get_path.pathFinder()
+            erasefeature.env_0 = path_links.water_blocks_gdb
+
+            for state in stateList:
+
+                erasewildcard = "*_"+state
+                erasefeatureList = erasefeature.get_file_path_with_wildcard_from_gdb(erasewildcard)
+
+                infeatureList = infeature.get_file_path_with_wildcard_from_gdb(erasewildcard)
+
+
+
+                print("\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx state: {} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n\n".format(state))
+
+
+                if len(infeatureList) ==0 or len(erasefeatureList)==0:
+                    print("one or more feature classes are mising for state: {}\n\n".format(state))
+                else:
+
+                    print("\n\nIn feature class is: {}\nErase feature class is: {}".format(os.path.basename(infeatureList[0]), os.path.basename(erasefeatureList[0])))
+
+                    outfeature = os.path.join(self.outputGDB, os.path.basename(infeatureList[0]))
+
+                    if arcpy.Exists(outfeature):
+                        print("\nthe feature class exists, Skipping!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+                    else:
+                        print("\n\nerasing, hold your horses")
+
+                        arcpy.Erase_analysis(infeatureList[0],erasefeatureList[0], outfeature)
+                        print(arcpy.GetMessages(0))
+                        print()
+
+        except:
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
 
 
 
