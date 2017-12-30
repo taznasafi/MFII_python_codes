@@ -2,11 +2,11 @@ import os
 ########################
 # _01_LTE
 ########################
-# xxxxxxxxxxxxxxxxxxxxxxxxx 01 create LTE xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# xxxxxxxxxxxxxxxxxxxxxxxxx 01 create LTE by state.py xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # import state boundary to gdb
 _01_gdb_name = "state_boundary_2010_wgs84"
-raw_state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
+
 
 # import LTE 5
 _02_gdb_name = "LTE5_Coverages"
@@ -20,27 +20,37 @@ _04_gdb_name = "LTE_Diss_by_pid_state"
 # Split LTE 5 by State and PID
 _05_gdb_name = "split_LTE5_coverages"
 
-# xxxxxxxxxxxxxxxxxxxxxxxxx 02 create LTE xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# xxxxxxxxxxxxxxxxxxxxxxxxx 02 add pid diss and split .py xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 _06_gdb_name = "merged_LTE5"
 
 _07_gdb_name = "LTE_Diss_by_pid_state"
 
+_08_gdb_name = "split_LTE5_coverages"
 
+# xxxxxxxxxxxxxxxxxxxxxxx input file paths xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-
-#basepath
+#basepath for output
 outputbasepath = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages"
 
-subsidy_table_path =r"E:\MFII_Dec2016\CSV Files\New_csv\CSV_TABLES.gdb\cetc_subsidy_pid_pivot"
+#basepath for input
+inputbasepath =r""
 
-
+# raw state boundary shapefiles
+raw_state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
 
 #state boundary  gdb path
-state_boundary_gdb = os.path.join(outputbasepath,_01_gdb_name)
+state_boundary_gdb = os.path.join(inputbasepath,_01_gdb_name)
+
+# wirecenter subsidy table already pivoted
+subsidy_table_path =r"E:\MFII_Dec2016\CSV Files\New_csv\CSV_TABLES.gdb\cetc_subsidy_pid_pivot"
 
 #raw Coverages form 477 bgdby
 Coverage_path_gdb = r"D:\Coverage_data\F-477\2016Dec\GDB\F477_bd_projected.gdb"
+
+
+
+
 
 # state_grid
 raw_state_grid = r"E:\state_boundary_jon"
@@ -50,7 +60,7 @@ raw_state_grid = r"E:\state_boundary_jon"
 Fips_table_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\state FiPS.txt"
 
 # Number of LTE 5 providers per state
-LTE5_table_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\LTE5_number_of_providers_per_state.csv"
+LTE5_table_path = "LTE5_number_of_providers_per_state.csv"
 
 dba_provider_dec2016_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\wtb_dba_provider_dec2016.csv"
 
