@@ -995,7 +995,7 @@ class Tools:
 
                     fm7.mergeRule = "First"
 
-                    f_name = fm4.outputField
+                    f_name = fm7.outputField
                     f_name.name = 'STATE_FIPS'
                     f_name.type = "Long Integer"
 
@@ -1078,7 +1078,7 @@ class Tools:
 
 
     def create_number_LTE5_perState_table(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+        from MFII_tools.Master.MFII_Arcpy import get_path, 
         import pandas as pd
 
         featureclass = get_path.pathFinder()
@@ -1111,7 +1111,7 @@ class Tools:
 
         print(df)
 
-        df.to_csv("E:\MFII_Dec2016\MFII_python_codes\CSVs\LTE5_number_of_providers_per_state.csv",
+        df.to_csv(os.path.join(path_links.inputbasepath, path_links.LTE5_table_path),
                   index_label="stateFIPS")
 
 
