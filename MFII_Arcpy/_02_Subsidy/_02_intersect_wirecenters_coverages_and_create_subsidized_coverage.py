@@ -38,7 +38,7 @@ for fips in states:
 droprows_geotool = geotools.Tools()
 
 droprows_geotool.outputPathFolder = path_links.outputbasepath
-droprows_geotool.outputGDBName = "_01A_cleaned_intersect_subsidy_with_Grid_"
+droprows_geotool.outputGDBName = "_01A_cleaned_intersect_subsidy_with_LTE5"
 droprows_geotool.create_gdb()
 droprows_geotool.inputGDB = wirecenterIntersect.outputGDB
 droprows_geotool.outputGDB = os.path.join(droprows_geotool.outputPathFolder, droprows_geotool.outputGDBName + ".gdb")

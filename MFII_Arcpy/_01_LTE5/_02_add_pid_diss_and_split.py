@@ -1,21 +1,17 @@
 from MFII_tools.Master.MFII_Arcpy import path_links, get_path, geotools
 import os
 
-
-
-
-
-
-#ADD PID AND STATE FIPS
+#ADD PID AND STATE FIPS to the cliped LTE 5
 pid = geotools.Tools()
-pid.inputGDB = path_links.lte5clip_gdp_path
+pid.inputGDB = path_links._03_gdb_name
 pid.attach_pid_StateFips_toCoverages()
 
 
+# Merge cliped LTE 5
 merge = geotools.Tools()
 merge.inputGDB = path_links.lte5clip_gdp_path
 merge.outputPathFolder = path_links.outputbasepath
-merge.outputGDBName = "_merged_LTE5"
+merge.outputGDBName = path_links._06_gdb_name
 merge.create_gdb()
 merge.outputGDB = os.path.join(merge.outputPathFolder, merge.outputGDBName+".gdb")
 merge.mergeCoverages()
@@ -27,7 +23,7 @@ merge.mergeCoverages()
 dissovle = geotools.Tools()
 dissovle.inputGDB = path_links.LTE5_merged_gdb_path
 dissovle.outputPathFolder = path_links.outputbasepath
-dissovle.outputGDBName = "LTE_Diss_by_pid_state"
+dissovle.outputGDBName = path_links._07_gdb_name
 dissovle.create_gdb()
 dissovle.outputGDB = os.path.join(dissovle.outputPathFolder, dissovle.outputGDBName+".gdb")
 dissovle.dissolveCoverages()
