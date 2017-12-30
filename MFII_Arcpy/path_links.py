@@ -34,7 +34,7 @@ _08_gdb_name = "split_LTE5_coverages"
 outputbasepath = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages"
 
 #basepath for input
-inputbasepath =r""
+inputbasepath =r"E:\New_MFII\input"
 
 # raw state boundary shapefiles
 raw_state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
