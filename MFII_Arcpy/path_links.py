@@ -14,19 +14,14 @@ _02_gdb_name = "LTE5_Coverages"
 # clip LTE 5 by state
 _03_gdb_name = "Clip_by_State"
 
+# merage by state
+_04_gdb_name = "merged_LTE5"
+
 # Dissolve by pid and state
-_04_gdb_name = "LTE_Diss_by_pid_state"
+_05_gdb_name = "LTE_Diss_by_pid_state"
 
 # Split LTE 5 by State and PID
-_05_gdb_name = "split_LTE5_coverages"
-
-# xxxxxxxxxxxxxxxxxxxxxxxxx 02 add pid diss and split .py xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-_06_gdb_name = "merged_LTE5"
-
-_07_gdb_name = "LTE_Diss_by_pid_state"
-
-_08_gdb_name = "split_LTE5_coverages"
+_06_gdb_name = "split_LTE5_coverages"
 
 # xxxxxxxxxxxxxxxxxxxxxxx input file paths xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
