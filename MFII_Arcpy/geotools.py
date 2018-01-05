@@ -1,27 +1,36 @@
 import os
 import sys
 import traceback
-
 import arcpy
+import logging
+import time
 
+formatter = ('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=r"{}_Log_{}.csv".format(__name__.replace(".", "_"), time.strftime("%Y_%m_%d_%H_%M")),
+                                 level=logging.DEBUG, format=formatter)
 
 class Tools:
-    def __int__(self, inputPath=None, inputGDB=None, outputGDBName=None, outputPathFolder=None, outputGDB=None):
+    def __int__(self, inputPath=None, inputGDB=None, outputGDBName=None, outputPathFolder=None, outputGDB=None, name = None):
         self.inputPath = inputPath
         self.inputGDB = inputGDB
         self.outputGDBName = outputGDBName
         self.outputPathFolder = outputPathFolder
         self.outputGDB = outputGDB
+        self.name = name
+
 
     def create_gdb(self):
         try:
             arcpy.CreateFileGDB_management(out_folder_path=self.outputPathFolder, out_name=self.outputGDBName)
             print(arcpy.GetMessages(0))
+            logging.info("created GDB, messages: {}".format(arcpy.GetMessages(0)))
+
 
         except arcpy.ExecuteError:
             msgs = arcpy.GetMessages(2)
             arcpy.AddError(msgs)
             print(msgs)
+            logging.info(msgs)
         except:
             tb = sys.exc_info()[2]
             tbinfo = traceback.format_tb(tb)[0]
@@ -31,6 +40,8 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+            logging.info(pymsg)
+            logging.info(msgs)
 
     def import_shapefiles_to_gdb(self, wildcard=None):
         from MFII_tools.Master.MFII_Arcpy import get_path
@@ -43,11 +54,14 @@ class Tools:
                 name = os.path.split(x)[1]
                 output = os.path.join(self.outputGDB, name.strip(".shp"))
                 print(output)
+                logging.info("Importing: {}".format(name.strip(".shp")))
                 if arcpy.Exists(output):
                     print("exists, passing over this fc")
+                    logging.warning("{} exists, passing over this fc".format(name.strip(".shp")))
                 else:
                     arcpy.FeatureClassToGeodatabase_conversion(x, self.outputGDB)
                     print(arcpy.GetMessages(0))
+                    logging.info(arcpy.GetMessages(0))
         except:
             tb = sys.exc_info()[2]
             tbinfo = traceback.format_tb(tb)[0]
@@ -57,6 +71,7 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+            logging.error(pymsg)
 
     def merge_feature_class(self, name):
         from MFII_tools.Master.MFII_Arcpy import get_path
@@ -64,12 +79,18 @@ class Tools:
         fcList = input_obj.get_path_for_all_feature_from_gdb()
 
         try:
-            arcpy.Merge_management(fcList, os.path.join(self.outputGDB, name))
-            print(arcpy.GetMessages(0))
+            if arcpy.Exists(os.path.join(self.outputGDB, name)):
+                logging.warning("the file exist, skipping over it")
+            else:
+
+                arcpy.Merge_management(fcList, os.path.join(self.outputGDB, name))
+                print(arcpy.GetMessages(0))
+                logging.info(arcpy.GetMessages(0))
         except arcpy.ExecuteError:
             msgs = arcpy.GetMessages(2)
             arcpy.AddError(msgs)
             print(msgs)
+            logging.error(msgs)
         except:
             tb = sys.exc_info()[2]
             tbinfo = traceback.format_tb(tb)[0]
@@ -79,6 +100,7 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+            logging.error(msgs)
 
     @classmethod
     def addJoin_and_copy_feature(cls, left_table, righttable, create_id_field, joinField, outpath, joinType=None):
@@ -86,32 +108,44 @@ class Tools:
         try:
             templayer = arcpy.MakeFeatureLayer_management(left_table, "temp")
 
-            if create_id_field == 0:
-                print("adding join")
-                arcpy.AddJoin_management("temp", joinField, righttable, joinField, joinType)
-                print(arcpy.GetMessages(0))
+            if arcpy.Exists(outpath):
+                logging.warning("This file exists, skipping!!!")
+            else:
 
-                arcpy.CopyFeatures_management("temp", outpath)
-                print(arcpy.GetMessages(0))
-                arcpy.Delete_management("temp")
 
-            if create_id_field == 1:
-                arcpy.AddField_management("temp", "id", "TEXT")
-                id_input = "{}+{}".format("!WC_CLLI!", 'str(!TT_ID!)')
-                arcpy.CalculateField_management("temp", "id", expression=id_input, expression_type="python 10.5")
+                if create_id_field == 0:
+                    print("adding join")
+                    arcpy.AddJoin_management("temp", joinField, righttable, joinField, joinType)
+                    print(arcpy.GetMessages(0))
+                    logging.info("added join to {}".format(left_table))
 
-                print("adding join")
-                arcpy.AddJoin_management("temp", joinField, righttable, joinField, joinType)
-                print(arcpy.GetMessages(0))
+                    arcpy.CopyFeatures_management("temp", outpath)
+                    print(arcpy.GetMessages(0))
+                    logging.info("copied feature to: {}".format(outpath))
+                    arcpy.Delete_management("temp")
 
-                arcpy.CopyFeatures_management("temp", outpath)
-                print(arcpy.GetMessages(0))
-                arcpy.Delete_management("temp")
+                if create_id_field == 1:
+                    logging.info("create id field selected")
+                    arcpy.AddField_management("temp", "id", "TEXT")
+                    id_input = "{}+{}".format("!WC_CLLI!", 'str(!TT_ID!)')
+                    logging.info("id field is statement is: {}".format(id_input))
+                    arcpy.CalculateField_management("temp", "id", expression=id_input, expression_type="python 10.5")
+
+                    print("adding join")
+                    arcpy.AddJoin_management("temp", joinField, righttable, joinField, joinType)
+                    print(arcpy.GetMessages(0))
+                    logging.info("added join")
+
+                    arcpy.CopyFeatures_management("temp", outpath)
+                    print(arcpy.GetMessages(0))
+                    logging.info("outpath: {}\nmessage: {}".format(outpath, arcpy.GetMessages(0)))
+                    arcpy.Delete_management("temp")
 
         except arcpy.ExecuteError:
             msgs = arcpy.GetMessages(2)
             arcpy.AddError(msgs)
             print(msgs)
+            logging.error(msgs)
             arcpy.Delete_management("temp")
         except:
             tb = sys.exc_info()[2]
@@ -122,6 +156,8 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
+            logging.error(msgs)
+            logging.error(pymsg)
             arcpy.Delete_management("temp")
 
     @classmethod
@@ -129,8 +165,10 @@ class Tools:
 
         try:
             print("intersect......plz wait!!")
+            logging.info("intersecting files")
             arcpy.Intersect_analysis(inlist, outpath)
             print(arcpy.GetMessages(0))
+            logging.info(arcpy.GetMessages(0))
         except arcpy.ExecuteError:
             msgs = arcpy.GetMessages(2)
             arcpy.AddError(msgs)
@@ -151,7 +189,7 @@ class Tools:
         fcTOfc = get_path.pathFinder(env_0=self.inputGDB)
 
         stateList = fcTOfc.make_fips_list()
-
+        logging.info("Copying Feature class to Featureclass with wildcard")
         for state in stateList:
             wildcard = "*_" + state
             fcList = fcTOfc.get_file_path_with_wildcard_from_gdb(wildcard)
@@ -275,7 +313,8 @@ class Tools:
 
             for fips in StatesList:
 
-                pidList = sub_Coverage.query_provider_by_FIPS(path_links.LTE5_table_path,str(int(fips)))
+                pidList = sub_Coverage.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                                                                           path_links.LTE5_table_path),str(int(fips)))
                 print("\n{} : {}".format(fips, pidList))
 
                 fc_response = "*_" + fips
@@ -654,7 +693,8 @@ class Tools:
 
             print("\n\n\t\t\t\t\tState fips: {}".format(state))
 
-            LTE5CoverageList = get_path.pathFinder.query_provider_by_FIPS(path_links.LTE5_table_path, str(int(state)))
+            LTE5CoverageList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                                                                           path_links.LTE5_table_path), str(int(state)))
 
             for y in LTE5CoverageList:
 
@@ -733,7 +773,7 @@ class Tools:
         from MFII_tools.Master.MFII_Arcpy import get_path, path_links
 
         mfblocks = get_path.pathFinder()
-        mfblocks.env_0 = path_links.mfIIblocks_split_gdb_path
+        mfblocks.env_0 = os.path.join(path_links.inputbasepath, path_links.mfi_subsidized_splits_gdb_name+".gdb")
 
         coverage = get_path.pathFinder()
         coverage.env_0 = self.inputGDB
@@ -744,7 +784,8 @@ class Tools:
 
         for state in stateList:
             print(state)
-            pidList = get_path.pathFinder.query_provider_by_FIPS(path_links.LTE5_table_path, str(int(state)))
+            pidList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                                                                           path_links.LTE5_table_path), str(int(state)))
 
             for pid in pidList:
 
@@ -826,6 +867,7 @@ class Tools:
                     out_path = os.path.join(self.outputGDB, blocksname)
                     if arcpy.Exists(out_path):
                         print("file exists, skipping")
+                        arcpy.Delete_management("temp")
 
                     else:
 
@@ -972,7 +1014,7 @@ class Tools:
                     fm5.mergeRule = "First"
 
                     f_name = fm5.outputField
-                    f_name.name = 'pid'
+                    f_name.name = 'PID'
                     f_name.type = "Long Integer"
 
                     fm5.outputField = f_name
@@ -1128,7 +1170,8 @@ class Tools:
         for state in stateList:
             print("\t\t\t\t\tFIPS: {}".format(state))
 
-            providerList = get_path.pathFinder.query_provider_by_FIPS(path_links.LTE5_table_path, str(int(state)))
+            providerList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                                                                           path_links.LTE5_table_path), str(int(state)))
             print(providerList)
 
             grid_wildcard = "*_" + state
@@ -1428,7 +1471,8 @@ class Tools:
                 erasewildcard = "*_"+state
                 erasefeatureList = erasefeature.get_file_path_with_wildcard_from_gdb(erasewildcard)
 
-                pidList = get_path.pathFinder.query_provider_by_FIPS(path_links.LTE5_table_path, str(int(state)))
+                pidList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                                                                           path_links.LTE5_table_path), str(int(state)))
 
                 for provider in pidList:
 

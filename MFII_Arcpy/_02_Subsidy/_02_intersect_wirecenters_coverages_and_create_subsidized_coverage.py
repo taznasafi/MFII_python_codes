@@ -4,7 +4,7 @@ from MFII_tools.Master.MFII_Arcpy import geotools, get_path, path_links
 
 wirecenterIntersect = geotools.Tools()
 
-wirecenterIntersect.outputPathFolder = path_links.outputbasepath
+wirecenterIntersect.outputPathFolder = path_links.inputbasepath
 wirecenterIntersect.outputGDBName = "_01_intersect_subsidy_with_Grid"
 wirecenterIntersect.create_gdb()
 wirecenterIntersect.outputGDB = os.path.join(wirecenterIntersect.outputPathFolder, wirecenterIntersect.outputGDBName + ".gdb")
@@ -37,7 +37,7 @@ for fips in states:
 
 droprows_geotool = geotools.Tools()
 
-droprows_geotool.outputPathFolder = path_links.outputbasepath
+droprows_geotool.outputPathFolder = path_links.inputbasepath
 droprows_geotool.outputGDBName = "_01A_cleaned_intersect_subsidy_with_LTE5"
 droprows_geotool.create_gdb()
 droprows_geotool.inputGDB = wirecenterIntersect.outputGDB
@@ -56,8 +56,8 @@ subCoverage = geotools.Tools()
 
 subCoverage.inputGDB = droprows_geotool.outputGDB
 
-subCoverage.outputGDBName = "_02_subsidized_coverage"
-subCoverage.outputPathFolder = path_links.outputbasepath
+subCoverage.outputGDBName = path_links.wirecenter_subsidized_gdb_name
+subCoverage.outputPathFolder = path_links.inputbasepath
 subCoverage.create_gdb()
 subCoverage.outputGDB = os.path.join(subCoverage.outputPathFolder, subCoverage.outputGDBName+".gdb")
 
@@ -68,8 +68,8 @@ deleteSubCoverageFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.output
 # split the coverages by state and provider
 splitSubsidized_Coverages = geotools.Tools()
 splitSubsidized_Coverages.inputGDB = subCoverage.outputGDB
-splitSubsidized_Coverages.outputPathFolder = path_links.outputbasepath
-splitSubsidized_Coverages.outputGDBName = "_03_split_subsidized_coverage"
+splitSubsidized_Coverages.outputPathFolder = path_links.inputbasepath
+splitSubsidized_Coverages.outputGDBName = path_links.wirecenter_splits_gdb_name
 splitSubsidized_Coverages.create_gdb()
 splitSubsidized_Coverages.outputGDB = os.path.join(splitSubsidized_Coverages.outputPathFolder, splitSubsidized_Coverages.outputGDBName+".gdb")
 splitSubsidized_Coverages.splitCoverages(split_fields=["STATE_FIPS", "pid"])

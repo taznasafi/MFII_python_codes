@@ -4,22 +4,22 @@ import os
 # merge the coverages
 
 merge = geotools.Tools()
-merge.outputPathFolder = path_links.outputbasepath
+merge.outputPathFolder = path_links.inputbasepath
 merge.outputGDBName = "_merged_ineligible_area"
 merge.create_gdb()
-merge.inputGDB = path_links.ineligible_coverages_minus_diminimus_gdb_path
+merge.inputGDB = os.path.join(path_links.inputbasepath, path_links.deminimus_ineligible_area_gdb_name+".gdb")
 merge.outputGDB = os.path.join(merge.outputPathFolder, merge.outputGDBName+".gdb")
-#merge.merge_ineligible_coverages()
+merge.merge_ineligible_coverages()
 
 # erase ineligible area from state grid
 
 erase = geotools.Tools()
-erase.outputPathFolder = path_links.outputbasepath
+erase.outputPathFolder = path_links.inputbasepath
 erase.outputGDBName = "_eligible_area"
 erase.create_gdb()
 erase.inputGDB = merge.outputGDB
 erase.outputGDB = os.path.join(erase.outputPathFolder, erase.outputGDBName+".gdb")
-#erase.erase_coverages_from_state_boundary()
+erase.erase_coverages_from_state_boundary()
 
 # erase water area from eligible area
 
@@ -31,9 +31,9 @@ erasewater.outputGDB = os.path.join(erasewater.outputPathFolder, erasewater.outp
 erasewater.inputGDB = erase.outputGDB
 erasewater.erase_water_blocks_from_eligible_area()
 
-#add field and calculate the eligible area
+
 
 addfield = geotools.Tools()
 addfield.inputGDB = erasewater.outputGDB
 addfield.add_field_for_all_fc("ELIG_AREA","DOUBLE", field_length=None)
-addfield.calculate_area_in_meters("ELIG_AREA")
+#addfield.calculate_area_in_meters("ELIG_AREA")

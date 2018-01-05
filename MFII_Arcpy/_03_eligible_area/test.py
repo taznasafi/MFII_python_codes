@@ -25,7 +25,7 @@ addfield.calculate_area_in_meters("WATER_AREA")
 
 deminimus = geotools.Tools()
 deminimus.inputGDB = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages\water_area_blocks_Grid.gdb"
-deminimus.outputPathFolder = path_links.outputbasepath
+deminimus.outputPathFolder = path_links.inputbasepath
 deminimus.outputGDBName = "_provider_coverages_minus_diminimus"
 deminimus.outputGDB = os.path.join(deminimus.outputPathFolder, deminimus.outputGDBName+".gdb")
 deminimus.drop_diminimus_area()
