@@ -29,22 +29,22 @@ _06_gdb_name = "split_LTE5_coverages"
 wirecenter_vintages_path = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages"
 
 #basepath for input
-inputbasepath =r"E:\New_MFII\input"
+inputbasepath =r"D:\FCC_GIS_Projects\MFII\June2017_Eligible_area\input"
 
 #basepath for output
-outputbasepath = r"E:\New_MFII\output"
+outputbasepath = r"D:\FCC_GIS_Projects\MFII\June2017_Eligible_area\output"
 
 # raw state boundary shapefiles
 raw_state_boundary_path =r"D:\Census_Data\tl_2010_state10_wgs84"
 
 #state boundary  gdb path
-state_boundary_gdb = os.path.join(inputbasepath,_01_gdb_name)
+state_boundary_gdb = os.path.join(inputbasepath,_01_gdb_name+".gdb")
 
 # wirecenter subsidy table already pivoted
 subsidy_table_path =r"E:\MFII_Dec2016\CSV Files\New_csv\CSV_TABLES.gdb\cetc_subsidy_pid_pivot"
 
 #raw Coverages form 477 gdb
-Coverage_path_gdb = r"D:\Coverage_data\F-477\2016Dec\GDB\F477_bd_projected.gdb"
+Coverage_path_gdb = r"D:\Coverage_data\F-477\2017June\f477_geom_bd_orig.gdb"
 
 
 # state_grid
@@ -90,7 +90,9 @@ mfi_blocks_erased_gdb_name = "_coverage_minus_subsidy_mfi"
 #mfi blocks that are subsidized splits
 mfi_subsidized_splits_gdb_name = "04_split_MFI_subsidy_by_state_pid"
 
-LTE5_diss_gdb_path = os.path.join(inputbasepath, "LTE_Diss_by_pid_state.gdb")
+LTE5_diss_gdb_path = os.path.join(inputbasepath, "LTE_Diss_by_pid_state")
+
+diced_lte5 = os.path.join(inputbasepath, "_diced_LTE5_Coverages")
 
 
 ########################
@@ -116,7 +118,8 @@ deminimus_ineligible_area_gdb_name = "_provider_coverages_minus_diminimus"
 
 
 #filer_pid_maping
-filer_pid_mapping_table_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\filer_pid_map-f477_dec2016_07aug2017_inventory-final.csv"
+#filer_pid_mapping_table_path = r"E:\MFII_Dec2016\MFII_python_codes\CSVs\filer_pid_map-f477_dec2016_07aug2017_inventory-final.csv"
+filer_pid_mapping_table_path = r"D:\FCC_GIS_Projects\MFII\June2017_Eligible_area\csv\providers_featureclass-f477_jun2017.csv"
 
 #MFII table
 MFII_table =r"E:\MFII_Dec2016\CSV Files\New_csv\CSV_TABLES.gdb\mf1_subsidy_pid_block_release_candidate_sep2017"
@@ -132,6 +135,6 @@ water_blocks_gdb = r"E:\MFII_Dec2016\GIS\Subsidy_information\WireCenter_Vintages
 
 
 #lete 5 clip
-LTE5_coverage = os.path.join(inputbasepath, _03_gdb_name)
+LTE5_coverage = os.path.join(inputbasepath, _03_gdb_name+".gdb")
 lte5clip_gdp_path = os.path.join(inputbasepath, "Clip_by_State.gdb")
 

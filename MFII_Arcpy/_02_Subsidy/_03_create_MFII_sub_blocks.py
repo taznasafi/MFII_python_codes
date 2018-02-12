@@ -2,7 +2,7 @@ import os
 
 from MFII_tools.Master.MFII_Arcpy import geotools, get_path, path_links
 
-print("1------import_wirecenters to gdb")
+print("1------import block to gdb")
 
 mfIIBlocks = geotools.Tools()
 

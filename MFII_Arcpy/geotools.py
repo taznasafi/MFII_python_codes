@@ -605,23 +605,24 @@ class Tools:
     def attach_pid_StateFips_toCoverages(self):
         from MFII_tools.Master.MFII_Arcpy import path_links, get_path
         import re
-        try:
-
-            fipsList = get_path.pathFinder.make_fips_list()
-            stateFips = get_path.pathFinder()
-            stateFips.env_0 = self.inputGDB
-
-            for state in fipsList:
-                wildcard = "*_" + state
-                fcList = stateFips.get_file_path_with_wildcard_from_gdb(wildcard)
-
-                for fc in fcList:
-
-                    print("\n",fc)
-                    fc_path_split = os.path.split(fc)
-                    fc_name = fc_path_split[1]
 
 
+        fipsList = get_path.pathFinder.make_fips_list()
+        stateFips = get_path.pathFinder()
+        stateFips.env_0 = self.inputGDB
+
+        for state in fipsList:
+            wildcard = "*_" + state
+            fcList = stateFips.get_file_path_with_wildcard_from_gdb(wildcard)
+
+            for fc in fcList:
+
+                print("\n",fc)
+                fc_path_split = os.path.split(fc)
+                fc_name = fc_path_split[1]
+
+
+                try:
 
                     print("\nadding field PID Field")
                     arcpy.AddField_management(fc, "PID", "LONG")
@@ -636,48 +637,59 @@ class Tools:
                     print(arcpy.GetMessages(0))
 
 
+                except:
+                    tb = sys.exc_info()[2]
+                    tbinfo = traceback.format_tb(tb)[0]
+                    pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+                    msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                    arcpy.AddError(pymsg)
+                    arcpy.AddError(msgs)
+                    print(pymsg)
+                    print(msgs)
+
+                finally:
 
 
                     fields = ["PID", "PNAME", "STATE_FIPS"]
 
-                    regex = r'(?i)^(?P<filename>(?P<dba>.+)_(?P<technology>\d{2})_(?P<spectrum>\d{2,3})_(?P<frn>\d{10})(?:_F477_\d+)?__LTE5_(?P<PID>\d{2}))$'
+
+                    #regex = r'(?i)^(?P<filename>(?P<dba>.+)_(?P<technology>\d{2})_(?P<spectrum>\d{2,3})_(?P<frn>\d{10})(?:_F477_\d+)?__LTE5_(?P<PID>\d{2}))$'
+                    regex = r'(?i)^(?P<filename>(?P<dba>.+)_(?P<technology>\d{2})_(?P<spectrum>\d{2,3})(?P<extra>.+)?)__LTE5_(?P<state>\d{2})'
+                    #regex = r'(?i)^(?P<filename>propagation_(?P<provider_id>\d+)_(?P<sname>\w+)_(?P<spectrum>\d+|agg)'\
+                    #            '(?:_(?P<bandwidth>\d+)mhz)?_(?P<state_fips>\d{2}))'
+                    #regex   =   r'^.*_(?P<state_fips>\d+)$'
 
                     namedic = re.match(regex, os.path.basename(fc)).groupdict()
 
-                    FRN = int(namedic['frn'])
+                    dba = namedic['filename']
+                    print(dba)
 
-                    a = get_path.pathFinder.query_provider_pid_by_provider_dba(path_links.filer_pid_mapping_table_path,FRN)
+                    #a = get_path.pathFinder.query_provider_pid_by_provider_FRN(path_links.filer_pid_mapping_table_path, FRN)
+                    a = get_path.pathFinder.query_pid_by_dba(path_links.filer_pid_mapping_table_path,dba)
 
-                    fc_FRN = a["f477_provider_frn"]
-
+                    #fc_FRN = a["f477_provider_frn"]
+                    #print(a)
+                    fc_dba = a["june2017_f477_featureclass"]
 
 
                     print("Populating fields!!!")
                     with arcpy.da.UpdateCursor(fc, fields) as cursor:
 
                         for row in cursor:
-                            if FRN == fc_FRN:
+                            if dba == fc_dba:
+
                                 row[0] = a["provider_id"]
                                 row[1] = a["provider_name"]
                                 row[2] = int(state)
-
                                 cursor.updateRow(row)
 
+                    #with arcpy.da.UpdateCursor(fc, ["STATE_FIPS"]) as cursor:
+                    #    for row in cursor:
+                    #        row[0] = int(state)
+                    #        cursor.updateRow(row)
 
-        except arcpy.ExecuteError:
-            msgs = arcpy.GetMessages(2)
-            arcpy.AddError(msgs)
-            print(msgs)
-        except:
-            tb = sys.exc_info()[2]
-            tbinfo = traceback.format_tb(tb)[0]
-            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(
-                sys.exc_info()[1])
-            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
-            arcpy.AddError(pymsg)
-            arcpy.AddError(msgs)
-            print(pymsg)
-            print(msgs)
+
+
 
 
 
@@ -916,11 +928,11 @@ class Tools:
             else:
 
                 try:
-                    fm = arcpy.FieldMap()  # DBA
-                    fm1 = arcpy.FieldMap()  # Technology
-                    fm2 = arcpy.FieldMap()  # Spectrum
-                    fm3 = arcpy.FieldMap()  # MinDown
-                    fm4 = arcpy.FieldMap()  # MinUp
+                    #fm = arcpy.FieldMap()  # DBA
+                    #fm1 = arcpy.FieldMap()  # Technology
+                    #fm2 = arcpy.FieldMap()  # Spectrum
+                    #fm3 = arcpy.FieldMap()  # MinDown
+                   #fm4 = arcpy.FieldMap()  # MinUp
                     fm5 = arcpy.FieldMap()  # PID
                     fm6 = arcpy.FieldMap()  # PNAME
                     fm7 = arcpy.FieldMap()  # STATE_FIPS
@@ -929,22 +941,22 @@ class Tools:
 
                     # DBA
                     for in_file in fcList:
-                        for field in arcpy.ListFields(in_file, "DBA"):
-                            fm.addInputField(in_file, field.name)
+                        #for field in arcpy.ListFields(in_file, "DBA"):
+                            #fm.addInputField(in_file, field.name)
 
-                        for field in arcpy.ListFields(in_file, "Technology"):
-                            fm1.addInputField(in_file, field.name)
+                        #for field in arcpy.ListFields(in_file, "Technology"):
+                            #fm1.addInputField(in_file, field.name)
 
-                        for field in arcpy.ListFields(in_file, "Spectrum"):
-                            fm2.addInputField(in_file, field.name)
+                        #for field in arcpy.ListFields(in_file, "Spectrum"):
+                            #fm2.addInputField(in_file, field.name)
 
-                        for field in arcpy.ListFields(in_file, "MinDown"):
-                            fm3.addInputField(in_file, field.name)
+                        #for field in arcpy.ListFields(in_file, "MinDown"):
+                            #fm3.addInputField(in_file, field.name)
 
-                        for field in arcpy.ListFields(in_file, "MinUp"):
-                            fm4.addInputField(in_file, field.name)
+                        #for field in arcpy.ListFields(in_file, "MinUp"):
+                            #fm4.addInputField(in_file, field.name)
 
-                        for field in arcpy.ListFields(in_file, "pid"):
+                        for field in arcpy.ListFields(in_file, "PID"):
                             fm5.addInputField(in_file, field.name)
 
                         for field in arcpy.ListFields(in_file, "PNAME"):
@@ -954,60 +966,60 @@ class Tools:
                             fm7.addInputField(in_file, field.name)
 
                     # DBA
-                    fm.mergeRule = "First"
+                    #fm.mergeRule = "First"
 
-                    f_name = fm.outputField
-                    f_name.name = 'DBA'
-                    f_name.length = 255
-                    f_name.type = "Text"
+                    #f_name = fm.outputField
+                    #f_name.name = 'DBA'
+                    #f_name.length = 255
+                    #f_name.type = "Text"
 
-                    fm.outputField = f_name
+                    #fm.outputField = f_name
 
-                    fms.addFieldMap(fm)
+                    #fms.addFieldMap(fm)
 
                     # Technology
-                    fm1.mergeRule = "First"
+                    #fm1.mergeRule = "First"
 
-                    f_name = fm1.outputField
-                    f_name.name = 'Technology'
-                    f_name.type = "Short Integer"
+                    #f_name = fm1.outputField
+                    #f_name.name = 'Technology'
+                    #f_name.type = "Short Integer"
 
-                    fm1.outputField = f_name
+                    #fm1.outputField = f_name
 
-                    fms.addFieldMap(fm1)
+                    #fms.addFieldMap(fm1)
 
                     # Spectrum
-                    fm2.mergeRule = "First"
+                    #fm2.mergeRule = "First"
 
-                    f_name = fm2.outputField
-                    f_name.name = 'Spectrum'
-                    f_name.type = "Short Integer"
+                    #f_name = fm2.outputField
+                    #f_name.name = 'Spectrum'
+                    #f_name.type = "Short Integer"
 
-                    fm2.outputField = f_name
+                    #fm2.outputField = f_name
 
-                    fms.addFieldMap(fm2)
+                    #fms.addFieldMap(fm2)
 
                     # MinDown
-                    fm3.mergeRule = "First"
+                    #fm3.mergeRule = "First"
 
-                    f_name = fm3.outputField
-                    f_name.name = 'MinDown'
-                    f_name.type = "Short Integer"
+                    #f_name = fm3.outputField
+                    #f_name.name = 'MinDown'
+                    #f_name.type = "Short Integer"
 
-                    fm3.outputField = f_name
+                    #fm3.outputField = f_name
 
-                    fms.addFieldMap(fm3)
+                    #fms.addFieldMap(fm3)
 
                     # MinUp
-                    fm4.mergeRule = "First"
+                    #fm4.mergeRule = "First"
 
-                    f_name = fm4.outputField
-                    f_name.name = 'MinUp'
-                    f_name.type = "Short Integer"
+                    #f_name = fm4.outputField
+                    #f_name.name = 'MinUp'
+                    #f_name.type = "Short Integer"
 
-                    fm4.outputField = f_name
+                    #fm4.outputField = f_name
 
-                    fms.addFieldMap(fm4)
+                    #fms.addFieldMap(fm4)
 
                     # Pid
 
@@ -1148,8 +1160,8 @@ class Tools:
 
         df.sort_index
 
-        df.columns = ["pidnum_1", "pidnum_2", "pidnum_3", "pidnum_4",
-                      'pidnum_5', 'pidnum_6', 'pidnum_7', 'pidnum_8']
+        #df.columns = ["pidnum_1", "pidnum_2", "pidnum_3", "pidnum_4",
+                      #'pidnum_5', 'pidnum_6', 'pidnum_7', 'pidnum_8']
 
         print(df)
 
@@ -1727,6 +1739,40 @@ class Tools:
             print(pymsg)
             print(msgs)
 
+
+
+    def diceLTE5Coverages(self):
+        from MFII_tools.Master.MFII_Arcpy import get_path
+        try:
+
+            fc = get_path.pathFinder(env_0=self.inputGDB)
+            fcList  = fc.get_path_for_all_feature_from_gdb()
+
+            for x in fcList:
+
+                print("Dicing:\n{}\n".format(os.path.basename(x)))
+
+                outfeature = os.path.join(self.outputGDB, "diced_"+os.path.basename(x))
+                vertxLimit = 10000
+
+                if arcpy.Exists(outfeature):
+                    print("this file exits, skipping !!!!\n")
+
+                else:
+
+                    print("Dicing files, please wait !!\n")
+                    arcpy.Dice_management(x,outfeature,vertxLimit)
+                    print(arcpy.GetMessages(0))
+
+        except:
+            tb = sys.exc_info()[2]
+            tbinfo = traceback.format_tb(tb)[0]
+            pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+            msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+            arcpy.AddError(pymsg)
+            arcpy.AddError(msgs)
+            print(pymsg)
+            print(msgs)
 
 
 

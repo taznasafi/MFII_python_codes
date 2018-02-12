@@ -9,8 +9,8 @@ erasewirecenters.outputPathFolder = path_links.inputbasepath
 erasewirecenters.outputGDBName = path_links.coverage_minus_subsidy_gdb_name
 erasewirecenters.create_gdb()
 erasewirecenters.outputGDB = os.path.join(erasewirecenters.outputPathFolder, erasewirecenters.outputGDBName+".gdb")
-#erasewirecenters.erase_wireCenter_subsidy(os.path.join(path_links.inputbasepath, path_links.wirecenter_splits_gdb_name+".gdb"),
-                                          #os.path.join(path_links.inputbasepath, path_links._06_gdb_name+ ".gdb"))
+erasewirecenters.erase_wireCenter_subsidy(os.path.join(path_links.inputbasepath, path_links.wirecenter_splits_gdb_name+".gdb"),
+                                          os.path.join(path_links.inputbasepath, path_links._06_gdb_name+ ".gdb"))
 
 
 print("erase MFI Coverages")

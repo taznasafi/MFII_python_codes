@@ -10,7 +10,7 @@ intersect_coverages.create_gdb()
 intersect_coverages.inputGDB = os.path.join(path_links.inputbasepath, path_links.mfi_blocks_erased_gdb_name+".gdb")
 intersect_coverages.outputGDB = os.path.join(intersect_coverages.outputPathFolder,
                                              intersect_coverages.outputGDBName+".gdb")
-intersect_coverages.intersect_coverages_by_stateGrid()
+#intersect_coverages.intersect_coverages_by_stateGrid()
 
 
 # dissolve the by grid
@@ -42,7 +42,7 @@ addfield = geotools.Tools()
 addfield.inputGDB = erase_water_areas.outputGDB
 addfield.add_field_for_all_fc("AREA","DOUBLE", field_length=None)
 #
-# addfield.calculate_area_in_meters("AREA")
+addfield.calculate_area_in_meters("AREA")
 
 
 # deminimus area taken away from Coverages

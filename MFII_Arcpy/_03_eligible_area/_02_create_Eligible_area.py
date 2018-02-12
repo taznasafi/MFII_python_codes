@@ -7,7 +7,7 @@ merge = geotools.Tools()
 merge.outputPathFolder = path_links.inputbasepath
 merge.outputGDBName = "_merged_ineligible_area"
 merge.create_gdb()
-merge.inputGDB = os.path.join(path_links.inputbasepath, path_links.deminimus_ineligible_area_gdb_name+".gdb")
+merge.inputGDB = os.path.join(path_links.outputbasepath, path_links.deminimus_ineligible_area_gdb_name+".gdb")
 merge.outputGDB = os.path.join(merge.outputPathFolder, merge.outputGDBName+".gdb")
 merge.merge_ineligible_coverages()
 
@@ -36,4 +36,4 @@ erasewater.erase_water_blocks_from_eligible_area()
 addfield = geotools.Tools()
 addfield.inputGDB = erasewater.outputGDB
 addfield.add_field_for_all_fc("ELIG_AREA","DOUBLE", field_length=None)
-#addfield.calculate_area_in_meters("ELIG_AREA")
+addfield.calculate_area_in_meters("ELIG_AREA")

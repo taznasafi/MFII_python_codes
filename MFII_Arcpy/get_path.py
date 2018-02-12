@@ -1,7 +1,7 @@
 import fnmatch
 import os
 import arcpy
-
+import pandas as pd
 from MFII_tools.Master.MFII_Arcpy import path_links
 
 
@@ -28,13 +28,17 @@ class pathFinder:
         arcpy.env.workspace = self.env_0
         fc = arcpy.ListFeatureClasses(wildcard)
 
-        fc_list_path = []
-        for x in fc:
-            fc_list_path.append(os.path.join(self.env_0, os.path.splitext(x)[0]))
+        if fc is None:
+            print("did not find fc, skipping")
+        else:
 
-        arcpy.ClearEnvironment("workspace")
-        print("I found {} many file(s)".format(len(fc_list_path)))
-        return fc_list_path
+            fc_list_path = []
+            for x in fc:
+                fc_list_path.append(os.path.join(self.env_0, os.path.splitext(x)[0]))
+
+            arcpy.ClearEnvironment("workspace")
+            print("I found {} many file(s)".format(len(fc_list_path)))
+            return fc_list_path
 
     @classmethod
     # create a list of fips from the table.
@@ -62,14 +66,22 @@ class pathFinder:
         return pid_query.provider.unique()
 
     @classmethod
-    def query_provider_pid_by_provider_dba(cls, table_path, frn):
+    def query_provider_pid_by_provider_FRN(cls, table_path, frn):
         import pandas as pd
         df = pd.read_csv(table_path)
         query_results = df.query("f477_provider_frn == {}".format(frn))
         dic = query_results.to_dict('records')
         return dic[0]
 
+    @classmethod
+    def query_pid_by_dba(cls, table_path, dba):
 
+        df = pd.read_csv(table_path)
+        #print(df)
+        query_results = df.query("june2017_f477_featureclass =='{}'".format(dba))
+        dic = query_results.to_dict('records')
+        #print(dic)
+        return dic[0]
 
 
 
