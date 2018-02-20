@@ -5,7 +5,7 @@ from MFII_python_codes.MFII_Arcpy import geotools, get_path, path_links
 
 
 wirecenterIntersect = geotools.Tools()
-wirecenterIntersect.outputPathFolder = path_links.inputbasepath
+wirecenterIntersect.outputPathFolder = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files"
 wirecenterIntersect.outputGDBName = "_01_intersect_subsidy_with_Grid"
 wirecenterIntersect.create_gdb()
 wirecenterIntersect.outputGDB = os.path.join(wirecenterIntersect.outputPathFolder, wirecenterIntersect.outputGDBName + ".gdb")
@@ -19,7 +19,7 @@ states = wirecenterSplitPath.make_fips_list()
 for fips in states:
     state_name = wirecenterSplitPath.query_state_name_by_fips(table_path=path_links.Fips_table_path, fips=fips)
 
-    LTE5Coverages_path.env_0 = path_links.LTE5_diss_gdb_path+".gdb"
+    LTE5Coverages_path.env_0 = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files\_diced_LTE5_Coverages.gdb"
     LTE5Coverages = LTE5Coverages_path.get_file_path_with_wildcard_from_gdb("*_"+fips)
     print(LTE5Coverages)
 
@@ -40,7 +40,7 @@ for fips in states:
 
 droprows_geotool = geotools.Tools()
 
-droprows_geotool.outputPathFolder = path_links.inputbasepath
+droprows_geotool.outputPathFolder = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files"
 droprows_geotool.outputGDBName = "_01A_cleaned_intersect_subsidy_with_LTE5"
 droprows_geotool.create_gdb()
 droprows_geotool.inputGDB = wirecenterIntersect.outputGDB
@@ -60,11 +60,11 @@ subCoverage = geotools.Tools()
 subCoverage.inputGDB = droprows_geotool.outputGDB
 
 subCoverage.outputGDBName = path_links.wirecenter_subsidized_gdb_name
-subCoverage.outputPathFolder = path_links.inputbasepath
+subCoverage.outputPathFolder = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files"
 subCoverage.create_gdb()
 subCoverage.outputGDB = os.path.join(subCoverage.outputPathFolder, subCoverage.outputGDBName+".gdb")
 
-subCoverage.export_subsidized_Coverage(lte5_table_basepath=path_links.inputbasepath)
+subCoverage.export_subsidized_Coverage(lte5_table_basepath=r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files")
 
 deleteSubCoverageFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.outputGDB, "gdb")
 
@@ -72,7 +72,7 @@ deleteSubCoverageFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.output
 splitSubsidized_Coverages = geotools.Tools()
 splitSubsidized_Coverages.inputGDB = subCoverage.outputGDB
 #splitSubsidized_Coverages.inputGDB = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\input\_02_subsidized_coverage.gdb"
-splitSubsidized_Coverages.outputPathFolder = path_links.inputbasepath
+splitSubsidized_Coverages.outputPathFolder = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files"
 splitSubsidized_Coverages.outputGDBName = path_links.wirecenter_splits_gdb_name
 splitSubsidized_Coverages.create_gdb()
 splitSubsidized_Coverages.outputGDB = os.path.join(splitSubsidized_Coverages.outputPathFolder, splitSubsidized_Coverages.outputGDBName+".gdb")

@@ -9,7 +9,7 @@ import_wirecenters.name = "import_wirecenter"
 
 import_wirecenters.inputPath = path_links.wirecenter_vintages_path
 import_wirecenters.outputGDBName = path_links.wirecenter_vintages_name
-import_wirecenters.outputPathFolder = path_links.inputbasepath
+import_wirecenters.outputPathFolder = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files"
 import_wirecenters.create_gdb()
 
 # 2---import shapefile to gdb
