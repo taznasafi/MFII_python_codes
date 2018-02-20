@@ -1,6 +1,6 @@
 import os
 from arcpy import Exists as arcpyExist
-from MFII_python_codes.MFII_Arcpy import geotools, get_path, path_links
+from MFII_Arcpy import geotools, get_path, path_links
 
 
 
@@ -71,7 +71,6 @@ deleteSubCoverageFC = geotools.Tools.deleteEmptyfeaturesFiles(subCoverage.output
 # split the coverages by state and provider
 splitSubsidized_Coverages = geotools.Tools()
 splitSubsidized_Coverages.inputGDB = subCoverage.outputGDB
-#splitSubsidized_Coverages.inputGDB = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\input\_02_subsidized_coverage.gdb"
 splitSubsidized_Coverages.outputPathFolder = r"D:\FCC_GIS_Projects\MFII\DataCollection\final_eligible_area\MFII_python_codes\Coverages\updated_files"
 splitSubsidized_Coverages.outputGDBName = path_links.wirecenter_splits_gdb_name
 splitSubsidized_Coverages.create_gdb()

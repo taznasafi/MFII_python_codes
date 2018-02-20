@@ -2,7 +2,7 @@ import fnmatch
 import os
 import arcpy
 import pandas as pd
-from MFII_python_codes.MFII_Arcpy import path_links
+from MFII_Arcpy import path_links
 
 
 class pathFinder:

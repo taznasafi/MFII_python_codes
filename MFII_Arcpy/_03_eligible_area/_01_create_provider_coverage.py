@@ -1,4 +1,4 @@
-from MFII_python_codes.MFII_Arcpy import path_links, get_path, geotools
+from MFII_Arcpy import path_links, get_path, geotools
 import os
 
 #intesect_ineligible area with grid

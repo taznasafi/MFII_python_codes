@@ -4,7 +4,7 @@ import traceback
 import arcpy
 import logging
 import time
-from MFII_python_codes.MFII_Arcpy import get_path, path_links
+from MFII_Arcpy import get_path, path_links
 
 formatter = ('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.basicConfig(filename=r"{}_Log_{}.csv".format(__name__.replace(".", "_"), time.strftime("%Y_%m_%d_%H_%M")),
