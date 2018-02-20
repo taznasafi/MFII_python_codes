@@ -4,6 +4,7 @@ import traceback
 import arcpy
 import logging
 import time
+from MFII_python_codes.MFII_Arcpy import get_path, path_links
 
 formatter = ('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.basicConfig(filename=r"{}_Log_{}.csv".format(__name__.replace(".", "_"), time.strftime("%Y_%m_%d_%H_%M")),
@@ -44,7 +45,7 @@ class Tools:
             logging.info(msgs)
 
     def import_shapefiles_to_gdb(self, wildcard=None):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
         shplist = get_path.pathFinder.get_shapefile_path_wildcard(self.inputPath, wildcard)
 
         print("\nI found {} files to import!!!".format(len(shplist)))
@@ -74,7 +75,7 @@ class Tools:
             logging.error(pymsg)
 
     def merge_feature_class(self, name):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
         input_obj = get_path.pathFinder(env_0=self.inputGDB)
         fcList = input_obj.get_path_for_all_feature_from_gdb()
 
@@ -184,7 +185,7 @@ class Tools:
             print(msgs)
 
     def CopyFeatureclassToFeatureclass_with_expression(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         fcTOfc = get_path.pathFinder(env_0=self.inputGDB)
 
@@ -233,7 +234,7 @@ class Tools:
 
     @classmethod
     def deleteEmptyfeaturesFiles(cls, path, type):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
         try:
             if type == "Shapefile":
                 shapefile_path = get_path.pathFinder()
@@ -300,10 +301,10 @@ class Tools:
             print(msgs)
 
 
-    def export_subsidized_Coverage(self):
+    def export_subsidized_Coverage(self, lte5_table_basepath):
         try:
 
-            from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
 
             sub_Coverage = get_path.pathFinder()
@@ -313,7 +314,7 @@ class Tools:
 
             for fips in StatesList:
 
-                pidList = sub_Coverage.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                pidList = sub_Coverage.query_provider_by_FIPS(os.path.join(lte5_table_basepath,
                                                                            path_links.LTE5_table_path),str(int(fips)))
                 print("\n{} : {}".format(fips, pidList))
 
@@ -413,7 +414,7 @@ class Tools:
 
 
     def splitCoverages(self, split_fields):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
         try:
 
@@ -448,7 +449,7 @@ class Tools:
 
 
     def clipshapefiles(self, clippath, infeaturepath, type):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         try:
             fipsList = get_path.pathFinder.make_fips_list()
@@ -505,7 +506,6 @@ class Tools:
 
 
     def importLTE5Coverages(self, wilcard, outputpath):
-        from MFII_tools.Master.MFII_Arcpy import get_path
 
         try:
 
@@ -565,7 +565,7 @@ class Tools:
 
 
     def importShapefilesToGDB(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         try:
             importShp = get_path.pathFinder()
@@ -603,7 +603,6 @@ class Tools:
             print(msgs)
 
     def attach_pid_StateFips_toCoverages(self):
-        from MFII_tools.Master.MFII_Arcpy import path_links, get_path
         import re
 
 
@@ -654,29 +653,35 @@ class Tools:
 
 
                     #regex = r'(?i)^(?P<filename>(?P<dba>.+)_(?P<technology>\d{2})_(?P<spectrum>\d{2,3})_(?P<frn>\d{10})(?:_F477_\d+)?__LTE5_(?P<PID>\d{2}))$'
-                    regex = r'(?i)^(?P<filename>(?P<dba>.+)_(?P<technology>\d{2})_(?P<spectrum>\d{2,3})(?P<extra>.+)?)__LTE5_(?P<state>\d{2})'
+                    #regex = r'(?i)^(?P<filename>(?P<dba>.+)_(?P<technology>\d{2})_(?P<spectrum>\d{2,3})(?P<extra>.+)?)__LTE5_(?P<state>\d{2})'
                     #regex = r'(?i)^(?P<filename>propagation_(?P<provider_id>\d+)_(?P<sname>\w+)_(?P<spectrum>\d+|agg)'\
                     #            '(?:_(?P<bandwidth>\d+)mhz)?_(?P<state_fips>\d{2}))'
                     #regex   =   r'^.*_(?P<state_fips>\d+)$'
+                    #final regex
+                    regex = r'(?i)^propagation_(?:(?P<state>\d{2})|(?P<area>us))_(?P<pid>\d{1,2})_.*$'
 
                     namedic = re.match(regex, os.path.basename(fc)).groupdict()
 
-                    dba = namedic['filename']
-                    print(dba)
+                    pid = int(namedic['pid'])
+                    print(pid)
 
                     #a = get_path.pathFinder.query_provider_pid_by_provider_FRN(path_links.filer_pid_mapping_table_path, FRN)
-                    a = get_path.pathFinder.query_pid_by_dba(path_links.filer_pid_mapping_table_path,dba)
+                    #a = get_path.pathFinder.query_pid_by_dba(path_links.filer_pid_mapping_table_path,dba)
+                    a = get_path.pathFinder.query_provider_name_by_pid(path_links.filer_pid_mapping_table_path, pid)
+                    print(a)
+
 
                     #fc_FRN = a["f477_provider_frn"]
                     #print(a)
-                    fc_dba = a["june2017_f477_featureclass"]
+                    fc_pid = a["provider_id"]
+                    print(fc_pid)
 
 
                     print("Populating fields!!!")
                     with arcpy.da.UpdateCursor(fc, fields) as cursor:
 
                         for row in cursor:
-                            if dba == fc_dba:
+                            if pid == fc_pid:
 
                                 row[0] = a["provider_id"]
                                 row[1] = a["provider_name"]
@@ -693,9 +698,9 @@ class Tools:
 
 
 
-    def erase_wireCenter_subsidy(self, wirecenterEnv, LTE5CoverageEnv):
+    def erase_wireCenter_subsidy(self, lte5_table_folder_path, wirecenterEnv, LTE5CoverageEnv):
 
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
         stateList = get_path.pathFinder.make_fips_list()
 
@@ -705,7 +710,7 @@ class Tools:
 
             print("\n\n\t\t\t\t\tState fips: {}".format(state))
 
-            LTE5CoverageList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+            LTE5CoverageList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(lte5_table_folder_path,
                                                                            path_links.LTE5_table_path), str(int(state)))
 
             for y in LTE5CoverageList:
@@ -728,7 +733,11 @@ class Tools:
                 # This part looks at Subsidy list that was created using the wildcard.
                 # So if the Subsidy list is empty then using the same wildcard that results in coverage list, that coverage
                 # would be exported or filtered to '_07_LTE5_Export.gdb' geodatabase.
-                if len(wireCenterList) == 0:
+
+                if len(wireCenterList)==0 and len(coverageList)==0:
+                    print("The wirecenter is missing or CoverageList is empty")
+
+                elif len(wireCenterList) == 0:
                     file_name = os.path.split(coverageList[0])
                     print("\nexporting this {} to out GDB".format(file_name[1]))
 
@@ -778,11 +787,11 @@ class Tools:
                             arcpy.AddError(msg)
                             print(msg)
 
-    def erase_MFI_Blocks(self):
+    def erase_MFI_Blocks(self, lte_tableList_folder):
 
 
 
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
         mfblocks = get_path.pathFinder()
         mfblocks.env_0 = os.path.join(path_links.inputbasepath, path_links.mfi_subsidized_splits_gdb_name+".gdb")
@@ -796,7 +805,7 @@ class Tools:
 
         for state in stateList:
             print(state)
-            pidList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+            pidList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(lte_tableList_folder,
                                                                            path_links.LTE5_table_path), str(int(state)))
 
             for pid in pidList:
@@ -809,7 +818,10 @@ class Tools:
                 print("coverage Wildcard: {}".format(coverageWildcard))
                 coverageList = coverage.get_file_path_with_wildcard_from_gdb(coverageWildcard)
 
-                if len(mfiList) == 0 and len(coverageList) != 0:
+                if coverageList is None and mfiList is None:
+                    print("none type discovered, skipping")
+
+                elif len(mfiList) == 0 and len(coverageList) != 0:
                     file_name = os.path.split(coverageList[0])
                     if arcpy.Exists(os.path.join(self.outputGDB, file_name[1])):
                         print("the file exits")
@@ -829,8 +841,10 @@ class Tools:
                             print(msg)
 
 
+
                 elif len(coverageList) == 0 and len(mfiList) == 0:
-                    print("returned no coverage for this wildcard phrase: {}, Skipping!!!!".format(coverageWildcard))
+                    print("returned no coverage and no mfi block for this wildcard phrase: {}, {}. Skipping!!!!".format(coverageWildcard, mfiWildcard))
+
 
                 else:
                     input_file = coverageList[0]
@@ -852,7 +866,7 @@ class Tools:
 
 
     def create_MFII_subsidy_blocks_by_state(self, righttable):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         try:
 
@@ -910,7 +924,7 @@ class Tools:
 
     def mergeCoverages(self):
 
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
         input_obj = get_path.pathFinder(env_0=self.inputGDB)
         stateList = input_obj.make_fips_list()
 
@@ -1080,7 +1094,7 @@ class Tools:
 
 
     def dissolveCoverages(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         try:
 
@@ -1131,8 +1145,8 @@ class Tools:
             print(msgs)
 
 
-    def create_number_LTE5_perState_table(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+    def create_number_LTE5_perState_table(self, name):
+
         import pandas as pd
 
         featureclass = get_path.pathFinder()
@@ -1165,13 +1179,13 @@ class Tools:
 
         print(df)
 
-        df.to_csv(os.path.join(path_links.inputbasepath, path_links.LTE5_table_path),
+        df.to_csv(os.path.join(self.outputPathFolder, name),
                   index_label="stateFIPS")
 
 
 
-    def intersect_coverages_by_stateGrid(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+    def intersect_coverages_by_stateGrid(self, lte_output_table_folder_path):
+
 
         stateList = get_path.pathFinder.make_fips_list()
 
@@ -1182,7 +1196,7 @@ class Tools:
         for state in stateList:
             print("\t\t\t\t\tFIPS: {}".format(state))
 
-            providerList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+            providerList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(lte_output_table_folder_path,
                                                                            path_links.LTE5_table_path), str(int(state)))
             print(providerList)
 
@@ -1230,7 +1244,7 @@ class Tools:
 
 
     def dissolve_ineligible_coverages(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
         try:
 
             in_features = get_path.pathFinder()
@@ -1286,7 +1300,7 @@ class Tools:
 
 
     def create_water_area_blocks(self, expression):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
         try:
 
             fcTOfc = get_path.pathFinder(env_0=self.inputGDB)
@@ -1349,7 +1363,7 @@ class Tools:
             print(msgs)
 
     def dissolveWaterArea(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         try:
 
@@ -1401,7 +1415,7 @@ class Tools:
 
 
     def intersect_water_by_stateGrid(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
         try:
 
@@ -1465,8 +1479,8 @@ class Tools:
             print(msgs)
 
 
-    def erase_water_blocks_from_coverage(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+    def erase_water_blocks_from_coverage(self, lte_table_output_folder):
+
 
         try:
 
@@ -1483,7 +1497,7 @@ class Tools:
                 erasewildcard = "*_"+state
                 erasefeatureList = erasefeature.get_file_path_with_wildcard_from_gdb(erasewildcard)
 
-                pidList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(path_links.inputbasepath,
+                pidList = get_path.pathFinder.query_provider_by_FIPS(os.path.join(lte_table_output_folder,
                                                                            path_links.LTE5_table_path), str(int(state)))
 
                 for provider in pidList:
@@ -1524,7 +1538,7 @@ class Tools:
             print(msgs)
 
     def add_field_for_all_fc(self, field_name, field_type, field_length):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
         fcObj = get_path.pathFinder()
         fcObj.env_0 = self.inputGDB
@@ -1556,7 +1570,7 @@ class Tools:
 
 
     def calculate_area_in_meters(self, field_name):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         fc = get_path.pathFinder()
         fc.env_0 = self.inputGDB
@@ -1585,7 +1599,7 @@ class Tools:
 
 
     def drop_diminimus_area(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
 
         fcObj = get_path.pathFinder()
         fcObj.env_0 = self.inputGDB
@@ -1613,7 +1627,7 @@ class Tools:
 
 
     def merge_ineligible_coverages(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path,path_links
+
         merge = get_path.pathFinder()
         merge.env_0 = self.inputGDB
 
@@ -1630,6 +1644,9 @@ class Tools:
 
             if arcpy.Exists(outfeature):
                 print("file already Exists, Skipping !!!!!!!!!!!!!!!!!\n")
+
+            elif len(mergeList) ==0:
+                print("merged list is zero, skipping!!!!")
 
             else:
 
@@ -1651,7 +1668,7 @@ class Tools:
 
 
     def erase_coverages_from_state_boundary(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path,path_links
+
         eraseFeature = get_path.pathFinder()
         eraseFeature.env_0 = self.inputGDB
         stateList = eraseFeature.make_fips_list()
@@ -1670,24 +1687,28 @@ class Tools:
 
             else:
 
-                try:
+                if len(eraseFeatureList) == 0 or len(inputFeatureList)==0:
+                    print("The erase feature or input feature is empty")
+                else:
 
-                    arcpy.Erase_analysis(inputFeatureList[0],eraseFeatureList[0],outFeature)
-                    print(arcpy.GetMessages(0))
+                    try:
 
-                except:
-                    tb = sys.exc_info()[2]
-                    tbinfo = traceback.format_tb(tb)[0]
-                    pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
-                    msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
-                    arcpy.AddError(pymsg)
-                    arcpy.AddError(msgs)
-                    print(pymsg)
-                    print(msgs)
+                        arcpy.Erase_analysis(inputFeatureList[0],eraseFeatureList[0],outFeature)
+                        print(arcpy.GetMessages(0))
+
+                    except:
+                        tb = sys.exc_info()[2]
+                        tbinfo = traceback.format_tb(tb)[0]
+                        pymsg = "PYTHON ERRORS:\nTraceback info:\n" + tbinfo + "\nError Info:\n" + str(sys.exc_info()[1])
+                        msgs = "ArcPy ERRORS:\n" + arcpy.GetMessages(2) + "\n"
+                        arcpy.AddError(pymsg)
+                        arcpy.AddError(msgs)
+                        print(pymsg)
+                        print(msgs)
 
 
     def erase_water_blocks_from_eligible_area(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path, path_links
+
 
         try:
 
@@ -1742,7 +1763,7 @@ class Tools:
 
 
     def diceLTE5Coverages(self):
-        from MFII_tools.Master.MFII_Arcpy import get_path
+
         try:
 
             fc = get_path.pathFinder(env_0=self.inputGDB)
@@ -1773,38 +1794,4 @@ class Tools:
             arcpy.AddError(msgs)
             print(pymsg)
             print(msgs)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

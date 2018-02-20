@@ -2,7 +2,7 @@ import fnmatch
 import os
 import arcpy
 import pandas as pd
-from MFII_tools.Master.MFII_Arcpy import path_links
+from MFII_python_codes.MFII_Arcpy import path_links
 
 
 class pathFinder:
@@ -27,12 +27,13 @@ class pathFinder:
     def get_file_path_with_wildcard_from_gdb(self, wildcard=None):
         arcpy.env.workspace = self.env_0
         fc = arcpy.ListFeatureClasses(wildcard)
+        fc_list_path = []
 
         if fc is None:
             print("did not find fc, skipping")
+            return fc_list_path
         else:
 
-            fc_list_path = []
             for x in fc:
                 fc_list_path.append(os.path.join(self.env_0, os.path.splitext(x)[0]))
 
@@ -62,8 +63,9 @@ class pathFinder:
     def query_provider_name_by_pid(cls, table_path, pid):
         import pandas as pd
         df = pd.read_csv(table_path)
-        pid_query = df.query("pid =="+pid)
-        return pid_query.provider.unique()
+        pid_query = df.query("provider_id =={}".format(pid))
+        dic = pid_query.to_dict('records')
+        return dic[0]
 
     @classmethod
     def query_provider_pid_by_provider_FRN(cls, table_path, frn):
